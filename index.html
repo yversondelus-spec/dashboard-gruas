@@ -3,866 +3,403 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AEROSAN — Control Operacional</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>AEROSAN — Dashboard Grúas Leasing</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════
-   AEROSAN CORPORATE PALETTE
-   Fondo: #0d1117   (negro-azul profundo)
-   Surface: #161b22  (grafito azulado)
-   Surface2: #21262d (gris oscuro)
-   Accent: #2563eb   (azul eléctrico corporativo)
-   Accent2: #3b82f6  (azul claro)
-   Texto: #e6edf3
-   Muted: #7d8590
-═══════════════════════════════════════════════ */
-:root{
-  --bg:       #0d1117;
-  --surf:     #161b22;
-  --surf2:    #21262d;
-  --brd:      rgba(48,54,61,0.8);
-  --brd-light:rgba(255,255,255,0.08);
-  --blue:     #2563eb;
-  --blue2:    #3b82f6;
-  --blue-glow:rgba(37,99,235,0.20);
-  --danger:   #f85149;
-  --warn:     #d29922;
-  --ok:       #3fb950;
-  --text:     #e6edf3;
-  --text2:    #c9d1d9;
-  --muted:    #7d8590;
-  --muted2:   #484f58;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Inter',sans-serif;
-  min-height:100vh;
-  overflow-x:hidden;
-}
+  :root {
+    --bg:#0b0f1a;--bg2:#101626;--bg3:#141c2e;--card:#131929;--card2:#1a2235;
+    --border:#1e2d45;--border2:#243450;
+    --ok:#00e676;--ok-dim:#00c85380;
+    --warn:#ffa726;--warn-dim:#ff980050;
+    --alert:#ffca28;--alert-dim:#ffc10750;
+    --limit:#f44336;--limit-dim:#ef535050;
+    --cyan:#00b8d9;--cyan-dim:#00b8d930;
+    --text:#e2eaf5;--text2:#7a90b0;--text3:#4a6080;
+    --prog-bg:#1e2d45;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',sans-serif;min-height:100vh;}
 
-/* ── HEADER ───────────────────────────────────── */
-header{
-  position:sticky;top:0;z-index:300;
-  background:rgba(13,17,23,0.97);
-  border-bottom:1px solid var(--brd);
-  backdrop-filter:blur(12px);
-  padding:0 32px;
-  display:flex;align-items:center;justify-content:space-between;
-  height:56px;
-}
-.logo-area{display:flex;align-items:center;gap:14px}
-.logo-badge{
-  width:36px;height:36px;border-radius:8px;flex-shrink:0;
-  background:var(--blue);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:15px;color:#fff;
-  letter-spacing:1px;box-shadow:0 0 16px var(--blue-glow);
-}
-.logo-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--text)}
-.logo-sub{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:-2px}
-.hdr-center{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:14px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;
-}
-.hdr-right{display:flex;align-items:center;gap:14px}
-.live-pill{
-  display:flex;align-items:center;gap:6px;
-  padding:4px 12px;border-radius:999px;
-  background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.25);
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  letter-spacing:2px;color:var(--ok);
-}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(63,185,80,0.5)}60%{opacity:.6;box-shadow:0 0 0 5px rgba(63,185,80,0)}}
-#clk{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
-#last-upd{font-size:10px;color:var(--muted);letter-spacing:.5px}
+  .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .logo-block{display:flex;align-items:center;gap:12px;}
+  .logo-badge{width:40px;height:40px;background:linear-gradient(135deg,#00b8d9,#0068b5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:#fff;letter-spacing:1px;}
+  .logo-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;}
+  .logo-sub{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:3px;text-transform:uppercase;}
+  .header-right{display:flex;align-items:center;gap:20px;}
+  .live-badge{display:flex;align-items:center;gap:6px;background:#002215;border:1px solid #00502a;border-radius:20px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--ok);letter-spacing:1px;}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+  .htime-main{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;}
+  .htime-sub{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
 
-/* ── TABS ─────────────────────────────────────── */
-.tabs-bar{
-  position:sticky;top:56px;z-index:200;
-  background:var(--surf);border-bottom:1px solid var(--brd);
-  display:flex;padding:0 32px;gap:0;
-}
-.tab{
-  display:flex;align-items:center;gap:7px;
-  padding:0 22px;height:46px;
-  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
-  border:none;background:transparent;color:var(--muted);
-  cursor:pointer;border-bottom:2px solid transparent;
-  transition:all .2s;font-family:'Inter',sans-serif;
-}
-.tab.on{color:var(--blue2);border-color:var(--blue2)}
-.tab:hover:not(.on){color:var(--text2)}
-.tab-ico{font-size:14px}
+  .tabs{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;}
+  .tab{padding:14px 20px;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
 
-/* ── MAIN ─────────────────────────────────────── */
-.main{padding:28px 32px;max-width:1400px;margin:0 auto}
-.panel{display:none;animation:fadeUp .3s ease}
-.panel.on{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .main{padding:20px 24px;}
 
-/* ── SECTION HEADER ───────────────────────────── */
-.sec-h{
-  display:flex;align-items:flex-end;justify-content:space-between;
-  margin-bottom:22px;flex-wrap:wrap;gap:10px;
-}
-.sec-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px}
-.sec-desc{font-size:12px;color:var(--muted);margin-top:2px}
-.sec-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;animation:fadeUp .4s ease both;}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-card.c-total::before{background:var(--cyan);}
+  .kpi-card.c-ok::before{background:var(--ok);}
+  .kpi-card.c-warn::before{background:var(--alert);}
+  .kpi-card.c-limit::before{background:var(--limit);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .kpi-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;}
+  .kpi-value{font-family:'Rajdhani',sans-serif;font-size:48px;font-weight:700;line-height:1;margin-bottom:4px;}
+  .kpi-card.c-total .kpi-value{color:var(--cyan);}
+  .kpi-card.c-ok .kpi-value{color:var(--ok);}
+  .kpi-card.c-warn .kpi-value{color:var(--alert);}
+  .kpi-card.c-limit .kpi-value{color:var(--limit);}
+  .kpi-sub{font-size:12px;color:var(--text2);}
 
-/* ── FILTROS ──────────────────────────────────── */
-.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.filter-row label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted)}
-select{
-  background:var(--surf2);border:1px solid var(--brd);
-  border-radius:6px;padding:6px 10px;color:var(--text);
-  font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:.18s;
-  cursor:pointer;
-}
-select:focus{border-color:var(--blue)}
-select option{background:var(--surf2)}
+  .section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
+  .section-title{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);}
 
-/* ── ALERTS ───────────────────────────────────── */
-.alerts{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
-.al{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:10px 16px;border-radius:8px;font-size:13px;line-height:1.5;
-}
-.al-r{background:rgba(248,81,73,0.08); border:1px solid rgba(248,81,73,0.25);  color:#ff8b87}
-.al-y{background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.25); color:#e3a21a}
-.al-g{background:rgba(63,185,80,0.08); border:1px solid rgba(63,185,80,0.22);  color:#56d364}
-.al-b{background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.22);  color:var(--blue2)}
-.al-ico{font-size:15px;flex-shrink:0;margin-top:1px}
-.al-body{flex:1}
+  .crane-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .crane-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:transform .15s,border-color .15s;animation:fadeUp .4s ease both;cursor:default;}
+  .crane-card:hover{transform:translateY(-2px);}
+  .crane-card.s-ok{border-color:var(--ok-dim);}
+  .crane-card.s-ok:hover{border-color:var(--ok);}
+  .crane-card.s-precaution{border-color:var(--warn-dim);}
+  .crane-card.s-precaution:hover{border-color:var(--warn);}
+  .crane-card.s-alert{border-color:var(--alert-dim);}
+  .crane-card.s-alert:hover{border-color:var(--alert);}
+  .crane-card.s-limit{border-color:var(--limit-dim);}
+  .crane-card.s-limit:hover{border-color:var(--limit);}
+  .crane-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+  .crane-name{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;}
+  .crane-plate{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:10px;}
+  .status-badge{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+  .status-badge.ok{background:#00281550;color:var(--ok);border:1px solid #00502a;}
+  .status-badge.precaution{background:#2a1a0050;color:var(--warn);border:1px solid #5a3a00;}
+  .status-badge.alert{background:#2a200050;color:var(--alert);border:1px solid #5a4a00;}
+  .status-badge.limit{background:#2a050550;color:var(--limit);border:1px solid #6a1010;}
+  .crane-km{display:flex;align-items:baseline;gap:4px;margin-bottom:8px;}
+  .crane-km-val{font-family:'Rajdhani',sans-serif;font-size:30px;font-weight:700;line-height:1;}
+  .crane-km-of{font-size:11px;color:var(--text2);}
+  .prog-bar{height:5px;background:var(--prog-bg);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+  .prog-fill{height:100%;border-radius:3px;}
+  .prog-fill.ok{background:var(--ok);}
+  .prog-fill.precaution{background:var(--warn);}
+  .prog-fill.alert{background:var(--alert);}
+  .prog-fill.limit{background:var(--limit);}
+  .crane-footer{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);}
+  .crane-footer .disp{color:var(--cyan);font-weight:600;}
 
-/* ── KPI STRIP ────────────────────────────────── */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:20px}
-.kpi{
-  background:var(--surf);border:1px solid var(--brd);
-  border-radius:10px;padding:18px 18px 14px;position:relative;overflow:hidden;
-}
-.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--blue);opacity:.6}
-.kpi.kd::after{background:var(--danger)}
-.kpi.kw::after{background:var(--warn)}
-.kpi.ko::after{background:var(--ok)}
-.kpi.kb::after{background:var(--blue);opacity:1}
-.kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:1.8px;color:var(--muted);margin-bottom:8px;font-weight:600}
-.kpi-v{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;letter-spacing:1px;color:var(--text)}
-.kpi-u{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);margin-left:3px}
-.kpi-s{font-size:11px;color:var(--muted);margin-top:4px}
-.cb{color:var(--blue2)}.cg{color:var(--ok)}.cr{color:var(--danger)}.cw{color:var(--warn)}
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;}
+  .chart-title{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  canvas{max-height:240px;}
 
-/* ── CARD ─────────────────────────────────────── */
-.card{
-  background:var(--surf);border:1px solid var(--brd);
-  border-radius:10px;padding:20px;margin-bottom:16px;
-}
-.card-t{
-  font-size:11px;text-transform:uppercase;letter-spacing:2px;
-  color:var(--muted);margin-bottom:18px;font-weight:600;
-  display:flex;align-items:center;gap:8px;
-}
-.card-t .ct-bar{display:inline-block;width:3px;height:12px;border-radius:2px;background:var(--blue);flex-shrink:0}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-@media(max-width:880px){.g2{grid-template-columns:1fr}}
+  .updated-badge{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;margin-bottom:16px;display:inline-block;}
 
-/* ── GRUA PROGRESS CARDS ─────────────────────── */
-.grua-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.grua-card{
-  background:var(--surf2);border:1px solid var(--brd);
-  border-radius:10px;padding:16px;position:relative;overflow:hidden;
-  transition:border-color .2s;
-}
-.grua-card:hover{border-color:rgba(37,99,235,0.4)}
-.grua-card.gc-r{border-color:rgba(248,81,73,0.35);background:rgba(248,81,73,0.05)}
-.grua-card.gc-y{border-color:rgba(210,153,34,0.35);background:rgba(210,153,34,0.04)}
-.gc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.gc-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px}
-.gc-badge{
-  display:inline-block;padding:2px 10px;border-radius:999px;
-  font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-}
-.gb-ok   {background:rgba(63,185,80,0.15);  color:var(--ok)}
-.gb-warn {background:rgba(210,153,34,0.15); color:#e3a21a}
-.gb-dang {background:rgba(248,81,73,0.15);  color:var(--danger)}
-.gc-km{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:10px}
-.gc-track{height:8px;background:rgba(255,255,255,0.07);border-radius:999px;overflow:hidden;margin-bottom:8px}
-.gc-fill{height:100%;border-radius:999px;transition:width 1.1s cubic-bezier(.34,1.4,.64,1)}
-.gf-ok  {background:linear-gradient(90deg,#3fb950,#2da340)}
-.gf-warn{background:linear-gradient(90deg,#d29922,#b8841c)}
-.gf-dang{background:linear-gradient(90deg,#f85149,#cf2828)}
-.gc-foot{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
-.gc-odo{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);margin-top:5px}
-
-/* ── FUEL BARS ────────────────────────────────── */
-.fuel-item{margin-bottom:16px}
-.fuel-item:last-child{margin-bottom:0}
-.fi-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-.fi-name{font-size:13px;font-weight:500}
-.fi-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
-.fi-bar{position:relative;height:18px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden}
-.fi-fill{height:100%;border-radius:5px;transition:width 1s cubic-bezier(.34,1.4,.64,1)}
-.fi-lbl{
-  position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff;
-  text-shadow:0 1px 3px rgba(0,0,0,.8);
-}
-.fi-detail{font-size:10px;color:var(--muted);margin-top:4px}
-
-/* ── TABLE ────────────────────────────────────── */
-.tw{overflow-x:auto;border-radius:7px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{
-  padding:9px 12px;text-align:left;
-  font-size:9px;text-transform:uppercase;letter-spacing:2px;
-  color:var(--muted);background:rgba(255,255,255,0.03);
-  border-bottom:1px solid var(--brd);font-weight:700;
-}
-tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);transition:background .12s}
-tbody tr:hover{background:rgba(255,255,255,0.025)}
-td{padding:9px 12px;color:var(--text2)}
-.mono{font-family:'JetBrains Mono',monospace;font-size:11px}
-.bdg{display:inline-block;padding:2px 8px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
-.bdg-ok  {background:rgba(63,185,80,0.15);  color:var(--ok)}
-.bdg-warn{background:rgba(210,153,34,0.15); color:#e3a21a}
-.bdg-dang{background:rgba(248,81,73,0.15);  color:var(--danger)}
-.bdg-blue{background:rgba(59,130,246,0.15); color:var(--blue2)}
-
-/* ── SUMMARY BAR ──────────────────────────────── */
-.sum-bar{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  background:var(--surf);border:1px solid var(--brd);
-  border-radius:10px;overflow:hidden;margin-bottom:20px;
-}
-.si{padding:16px 18px;text-align:center;border-right:1px solid var(--brd)}
-.si:last-child{border-right:none}
-.si-v{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;color:var(--text)}
-.si-l{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-top:3px;font-weight:600}
-
-/* ── INFO BOX ─────────────────────────────────── */
-.info-box{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:12px 16px;margin-bottom:16px;
-  background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.2);
-  border-radius:8px;font-size:12px;color:var(--blue2);line-height:1.6;
-}
-
-/* ── EMPTY ────────────────────────────────────── */
-.empty{text-align:center;padding:44px 20px}
-.empty-ico{font-size:32px;margin-bottom:10px;opacity:.5}
-.empty p{font-size:13px;color:var(--muted)}
-
-/* ── SEPARADOR ────────────────────────────────── */
-.divider{height:1px;background:var(--brd);margin:20px 0}
-
-/* ── CHART ────────────────────────────────────── */
-canvas{max-width:100%}
+  @media(max-width:900px){.crane-grid{grid-template-columns:repeat(2,1fr);}.kpi-row{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="logo-area">
+<header class="header">
+  <div class="logo-block">
     <div class="logo-badge">AS</div>
     <div>
-      <div class="logo-name">AEROSAN</div>
-      <div class="logo-sub">Control Operacional</div>
+      <div class="logo-title">AEROSAN</div>
+      <div class="logo-sub">OPS Control Center</div>
     </div>
   </div>
-  <div class="hdr-center">COMBUSTIBLE &amp; GRÚAS LEASING</div>
-  <div class="hdr-right">
-    <div class="live-pill"><div class="live-dot"></div>LIVE</div>
-    <div id="clk">—</div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div>
+      <div class="htime-main">18:19</div>
+      <div class="htime-sub">Actualizado: 21/03/2026</div>
+    </div>
   </div>
 </header>
 
-<!-- TABS -->
-<div class="tabs-bar">
-  <button class="tab on" onclick="openTab('gruas',this)"><span class="tab-ico">🏗️</span>KM GRÚAS</button>
-  <button class="tab"    onclick="openTab('fuel',this)"><span class="tab-ico">⛽</span>COMBUSTIBLE</button>
-  <button class="tab"    onclick="openTab('res',this)"><span class="tab-ico">📊</span>RESUMEN</button>
-</div>
+<nav class="tabs">
+  <div class="tab active">🏗️ GRÚAS LEASING</div>
+  <div class="tab">🔴 COMBUSTIBLE</div>
+</nav>
 
 <div class="main">
 
-<!-- ════════════════════════════════════
-     PANEL: KM GRÚAS
-═════════════════════════════════════ -->
-<div id="p-gruas" class="panel on">
-  <div class="sec-h">
-    <div>
-      <div class="sec-title">🏗️ KM — <span class="cb">Grúas Leasing</span></div>
-      <div class="sec-desc">Límite contrato: 160 km / grúa / mes · Lectura diaria de odómetro</div>
+  <div class="kpi-row">
+    <div class="kpi-card c-total" style="animation-delay:.05s">
+      <div class="kpi-label">Total Grúas</div>
+      <div class="kpi-value">12</div>
+      <div class="kpi-sub">10 con datos este mes</div>
     </div>
-    <div class="sec-right">
-      <div class="filter-row">
-        <label>Mes:</label><select id="gmes" onchange="drawGruas()"></select>
-        <label>Año:</label><select id="ganio" onchange="drawGruas()"></select>
-      </div>
+    <div class="kpi-card c-ok" style="animation-delay:.1s">
+      <div class="kpi-label">Estado OK</div>
+      <div class="kpi-value">7</div>
+      <div class="kpi-sub">bajo 60% del límite</div>
     </div>
-  </div>
-
-  <div class="info-box">
-    <span style="font-size:15px;flex-shrink:0">ℹ️</span>
-    <div><strong>Lógica odómetro:</strong> KM del día = Lectura actual − Lectura anterior. El acumulado mensual parte desde el odómetro de inicio de mes configurado. Si la grúa no operó, no se ingresa fila.</div>
-  </div>
-
-  <div class="alerts" id="g-al"></div>
-  <div class="kpis" id="g-kpi"></div>
-
-  <!-- GRÚAS CARDS -->
-  <div class="card">
-    <div class="card-t"><span class="ct-bar"></span>Progreso KM por grúa — mes seleccionado</div>
-    <div class="grua-grid" id="g-cards">
-      <div class="empty"><div class="empty-ico">⏳</div><p>Cargando datos...</p></div>
+    <div class="kpi-card c-warn" style="animation-delay:.15s">
+      <div class="kpi-label">En Alerta</div>
+      <div class="kpi-value">0</div>
+      <div class="kpi-sub">entre 60% y 100%</div>
+    </div>
+    <div class="kpi-card c-limit" style="animation-delay:.2s">
+      <div class="kpi-label">Límite Superado</div>
+      <div class="kpi-value">2</div>
+      <div class="kpi-sub">≥ 160 km este mes</div>
     </div>
   </div>
 
-  <div class="g2">
-    <div class="card">
-      <div class="card-t"><span class="ct-bar"></span>KM acumulados vs límite (160 km)</div>
-      <canvas id="ch-kb" height="260"></canvas>
-    </div>
-    <div class="card">
-      <div class="card-t"><span class="ct-bar"></span>Distribución de uso entre grúas</div>
-      <canvas id="ch-kp" height="260"></canvas>
+  <div class="section">
+    <div class="section-title"><span class="section-dot"></span>ESTADO DE GRÚAS — KM RECORRIDOS ESTE MES (LÍMITE 160 KM)</div>
+    <div class="crane-grid">
+      
+        <div class="crane-card s-ok" style="animation-delay:0.00s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 1</div>
+            <div class="status-badge ok">● OK</div>
+          </div>
+          <div class="crane-plate">AB-1234</div>
+          <div class="crane-km">
+            <span class="crane-km-val">42</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:26%"></div></div>
+          <div class="crane-footer">
+            <span>26% usado</span>
+            <span class="disp">118 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-precaution" style="animation-delay:0.05s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 2</div>
+            <div class="status-badge precaution">● Precaución</div>
+          </div>
+          <div class="crane-plate">CD-5678</div>
+          <div class="crane-km">
+            <span class="crane-km-val">98</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill precaution" style="width:61%"></div></div>
+          <div class="crane-footer">
+            <span>61% usado</span>
+            <span class="disp">62 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-limit" style="animation-delay:0.10s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 3</div>
+            <div class="status-badge limit">● Límite</div>
+          </div>
+          <div class="crane-plate">EF-9012</div>
+          <div class="crane-km">
+            <span class="crane-km-val">162</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill limit" style="width:100%"></div></div>
+          <div class="crane-footer">
+            <span>100% usado</span>
+            <span class="disp">0 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-ok" style="animation-delay:0.15s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 4</div>
+            <div class="status-badge ok">● OK</div>
+          </div>
+          <div class="crane-plate">GH-3456</div>
+          <div class="crane-km">
+            <span class="crane-km-val">55</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:34%"></div></div>
+          <div class="crane-footer">
+            <span>34% usado</span>
+            <span class="disp">105 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-precaution" style="animation-delay:0.20s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 5</div>
+            <div class="status-badge precaution">● Precaución</div>
+          </div>
+          <div class="crane-plate">IJ-7890</div>
+          <div class="crane-km">
+            <span class="crane-km-val">137</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill precaution" style="width:86%"></div></div>
+          <div class="crane-footer">
+            <span>86% usado</span>
+            <span class="disp">23 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-ok" style="animation-delay:0.25s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 6</div>
+            <div class="status-badge ok">● OK</div>
+          </div>
+          <div class="crane-plate">KL-1234</div>
+          <div class="crane-km">
+            <span class="crane-km-val">31</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:19%"></div></div>
+          <div class="crane-footer">
+            <span>19% usado</span>
+            <span class="disp">129 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-precaution" style="animation-delay:0.30s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 7</div>
+            <div class="status-badge precaution">● Precaución</div>
+          </div>
+          <div class="crane-plate">MN-5678</div>
+          <div class="crane-km">
+            <span class="crane-km-val">112</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill precaution" style="width:70%"></div></div>
+          <div class="crane-footer">
+            <span>70% usado</span>
+            <span class="disp">48 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-limit" style="animation-delay:0.35s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 8</div>
+            <div class="status-badge limit">● Límite</div>
+          </div>
+          <div class="crane-plate">OP-9012</div>
+          <div class="crane-km">
+            <span class="crane-km-val">165</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill limit" style="width:100%"></div></div>
+          <div class="crane-footer">
+            <span>100% usado</span>
+            <span class="disp">0 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-ok" style="animation-delay:0.40s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 9</div>
+            <div class="status-badge ok">● OK</div>
+          </div>
+          <div class="crane-plate">QR-3456</div>
+          <div class="crane-km">
+            <span class="crane-km-val">78</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:49%"></div></div>
+          <div class="crane-footer">
+            <span>49% usado</span>
+            <span class="disp">82 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-ok" style="animation-delay:0.45s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 10</div>
+            <div class="status-badge ok">● OK</div>
+          </div>
+          <div class="crane-plate">ST-7890</div>
+          <div class="crane-km">
+            <span class="crane-km-val">22</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:14%"></div></div>
+          <div class="crane-footer">
+            <span>14% usado</span>
+            <span class="disp">138 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-ok" style="animation-delay:0.50s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 11</div>
+            <div class="status-badge ok">● OK</div>
+          </div>
+          <div class="crane-plate">UV-1234</div>
+          <div class="crane-km">
+            <span class="crane-km-val">0</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:0%"></div></div>
+          <div class="crane-footer">
+            <span>0% usado</span>
+            <span class="disp">160 km disp.</span>
+          </div>
+        </div>
+        <div class="crane-card s-ok" style="animation-delay:0.55s">
+          <div class="crane-header">
+            <div class="crane-name">GRÚA 12</div>
+            <div class="status-badge ok">● OK</div>
+          </div>
+          <div class="crane-plate">WX-5678</div>
+          <div class="crane-km">
+            <span class="crane-km-val">0</span>
+            <span class="crane-km-of">/ 160 km</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:0%"></div></div>
+          <div class="crane-footer">
+            <span>0% usado</span>
+            <span class="disp">160 km disp.</span>
+          </div>
+        </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-t"><span class="ct-bar"></span>Registro diario de odómetro</div>
-    <div class="tw"><table>
-      <thead><tr>
-        <th>Fecha</th><th>Grúa</th><th>Lectura Odómetro</th>
-        <th>KM del día</th><th>KM acum. mes</th><th>KM restantes</th>
-        <th>Estado</th><th>Observación</th><th>Supervisor</th>
-      </tr></thead>
-      <tbody id="g-tb"></tbody>
-    </table></div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title"><span class="section-dot"></span>KM RECORRIDOS POR GRÚA ESTE MES</div>
+      <canvas id="barChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="section-dot"></span>DISTRIBUCIÓN DE ESTADO</div>
+      <canvas id="donutChart"></canvas>
+    </div>
   </div>
+
 </div>
-
-<!-- ════════════════════════════════════
-     PANEL: COMBUSTIBLE
-═════════════════════════════════════ -->
-<div id="p-fuel" class="panel">
-  <div class="sec-h">
-    <div>
-      <div class="sec-title">⛽ Control de <span class="cb">Combustible</span></div>
-      <div class="sec-desc">Vehículos livianos y tractores · Stock por equipo</div>
-    </div>
-    <div class="sec-right">
-      <div class="filter-row">
-        <label>Mes:</label><select id="fmes" onchange="drawFuel()"></select>
-        <label>Año:</label><select id="fanio" onchange="drawFuel()"></select>
-      </div>
-    </div>
-  </div>
-
-  <div class="alerts" id="f-al"></div>
-  <div class="kpis" id="f-kpi"></div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-t"><span class="ct-bar"></span>Nivel de stock por equipo</div>
-      <div id="f-lv"><div class="empty"><div class="empty-ico">⏳</div><p>Cargando...</p></div></div>
-    </div>
-    <div class="card">
-      <div class="card-t"><span class="ct-bar"></span>Litros cargados en el período</div>
-      <canvas id="ch-f" height="270"></canvas>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-t"><span class="ct-bar"></span>Historial de cargas</div>
-    <div class="tw"><table>
-      <thead><tr><th>Fecha</th><th>Vehículo / Tractor</th><th>Litros cargados</th><th>Responsable</th></tr></thead>
-      <tbody id="f-tb"></tbody>
-    </table></div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════
-     PANEL: RESUMEN
-═════════════════════════════════════ -->
-<div id="p-res" class="panel">
-  <div class="sec-h">
-    <div>
-      <div class="sec-title">📊 Resumen <span class="cb">General</span></div>
-      <div class="sec-desc">Vista consolidada · Mes actual</div>
-    </div>
-  </div>
-  <div class="sum-bar" id="sum-bar">
-    <div class="si"><div class="si-v cb" id="s-st">—</div><div class="si-l">Stock Total (L)</div></div>
-    <div class="si"><div class="si-v cb" id="s-km">—</div><div class="si-l">KM Totales Mes</div></div>
-    <div class="si"><div class="si-v" id="s-cr">—</div><div class="si-l">Equipos Alerta</div></div>
-    <div class="si"><div class="si-v" id="s-ri">—</div><div class="si-l">Grúas en Riesgo</div></div>
-    <div class="si"><div class="si-v cb">160</div><div class="si-l">Límite km/mes</div></div>
-  </div>
-  <div class="g2">
-    <div class="card">
-      <div class="card-t"><span class="ct-bar"></span>Cargas de combustible — mes actual</div>
-      <canvas id="ch-rf" height="240"></canvas>
-    </div>
-    <div class="card">
-      <div class="card-t"><span class="ct-bar"></span>KM por grúa vs límite</div>
-      <canvas id="ch-rk" height="240"></canvas>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-t"><span class="ct-bar"></span>🔔 Alertas activas</div>
-    <div id="r-al"><div class="empty"><div class="empty-ico">⏳</div><p>Cargando...</p></div></div>
-  </div>
-</div>
-
-</div><!-- /main -->
 
 <script>
-// ═══════════════════════════════════════════════
-//  CONFIG & STATE
-// ═══════════════════════════════════════════════
-const MES_NOM=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio',
-               'Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-let CFG={}, FUEL=[], GRUAS_DATA=[];
-let KM_LIMIT=160, KM_WARN_P=80, KM_DANG_P=90;
-let COMB_WARN_P=35, COMB_CRIT_P=15;
-let GRUAS=[], VEHS=[];
-let CH={};
-
-// ═══════════════════════════════════════════════
-//  CLOCK
-// ═══════════════════════════════════════════════
-(function tick(){
-  const n=new Date();
-  document.getElementById('clk').textContent=
-    n.toLocaleDateString('es-CL')+' — '+n.toTimeString().slice(0,8);
-  setTimeout(tick,1000);
-})();
-
-// ═══════════════════════════════════════════════
-//  TABS
-// ═══════════════════════════════════════════════
-function openTab(id,btn){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
-  document.getElementById('p-'+id).classList.add('on');
-  btn.classList.add('on');
-  if(id==='res') drawRes();
-}
-
-// ═══════════════════════════════════════════════
-//  SELECTORS
-// ═══════════════════════════════════════════════
-function initSel(){
-  const now=new Date();
-  ['gmes','fmes'].forEach(id=>{
-    const el=document.getElementById(id); el.innerHTML='';
-    MES_NOM.forEach((m,i)=>{
-      const o=document.createElement('option');
-      o.value=i; o.textContent=m;
-      if(i===now.getMonth()) o.selected=true;
-      el.appendChild(o);
-    });
-  });
-  ['ganio','fanio'].forEach(id=>{
-    const el=document.getElementById(id); el.innerHTML='';
-    for(let y=2025;y<=2027;y++){
-      const o=document.createElement('option');
-      o.value=y; o.textContent=y;
-      if(y===now.getFullYear()) o.selected=true;
-      el.appendChild(o);
-    }
-  });
-}
-
-// ═══════════════════════════════════════════════
-//  LOAD JSON DATA
-// ═══════════════════════════════════════════════
-async function loadData(){
-  try{
-    const [cfg,fuel,gruas]=await Promise.all([
-      fetch('data/config.json').then(r=>r.json()),
-      fetch('data/combustible.json').then(r=>r.json()),
-      fetch('data/gruas.json').then(r=>r.json()),
-    ]);
-    CFG=cfg; FUEL=fuel; GRUAS_DATA=gruas;
-
-    KM_LIMIT    = cfg.km_limite_mensual       || 160;
-    KM_WARN_P   = cfg.km_alerta_naranja_pct   || 80;
-    KM_DANG_P   = cfg.km_alerta_roja_pct      || 90;
-    COMB_WARN_P = cfg.combustible_alerta_bajo_pct    || 35;
-    COMB_CRIT_P = cfg.combustible_alerta_critico_pct || 15;
-
-    GRUAS = cfg.gruas   || [];
-    VEHS  = cfg.vehiculos || [];
-
-    // Fecha de última actualización
-    const allDates=[...fuel,...gruas].map(r=>r.fecha).sort().slice(-1)[0];
-    if(allDates){
-      document.getElementById('clk').textContent;
-    }
-
-    drawGruas();
-    drawFuel();
-    drawRes();
-
-  }catch(err){
-    console.error('Error cargando datos:',err);
-    document.querySelectorAll('.panel.on').forEach(p=>{
-      p.innerHTML=`<div class="empty"><div class="empty-ico">⚠️</div>
-        <p>No se pudieron cargar los datos. Verifica que los archivos <strong>data/*.json</strong> existan.</p>
-        <p style="margin-top:8px;font-size:11px;color:var(--muted)">${err.message}</p>
-      </div>`;
-    });
+const limitLine = {
+  id:'limitLine',
+  afterDraw(chart){
+    const{ctx,chartArea:{left,right},scales:{y}}=chart;
+    const yPos=y.getPixelForValue(160);
+    ctx.save();ctx.strokeStyle='#f4433680';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+    ctx.beginPath();ctx.moveTo(left,yPos);ctx.lineTo(right,yPos);ctx.stroke();ctx.restore();
   }
-}
+};
+Chart.register(limitLine);
 
-// ═══════════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════════
-function getPer(pfx){
-  return{
-    mes :parseInt(document.getElementById(pfx+'mes').value),
-    anio:parseInt(document.getElementById(pfx+'anio').value)
-  };
-}
-function inPer(dateStr,mes,anio){
-  const d=new Date(dateStr); if(isNaN(d)) return false;
-  return d.getMonth()===mes && d.getFullYear()===anio;
-}
-function mkCH(id,cfg){
-  if(CH[id]) CH[id].destroy();
-  const el=document.getElementById(id); if(!el) return;
-  CH[id]=new Chart(el,cfg);
-}
-const axStyle=()=>({ticks:{color:'#7d8590',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}});
-const lgStyle=()=>({labels:{color:'#7d8590',font:{size:11},boxWidth:12}});
-
-// ── ODÓMETRO → KM MES ──────────────────────────
-// km_dia = lectura_hoy − lectura_anterior (misma grúa)
-// base = última lectura ANTES del mes (o odo_inicio_mes del CONFIG)
-function calcKMGruas(mes,anio){
-  const result={};
-  GRUAS.forEach(g=>{
-    const allG=GRUAS_DATA
-      .filter(r=>r.grua===g.nombre)
-      .sort((a,b)=>a.fecha.localeCompare(b.fecha));
-
-    const iniMes=`${anio}-${String(mes+1).padStart(2,'0')}-01`;
-    const prev=allG.filter(r=>r.fecha<iniMes).slice(-1)[0];
-    const base=prev?prev.lectura:(g.odo_inicio_mes||0);
-
-    const mesG=allG.filter(r=>inPer(r.fecha,mes,anio));
-    if(mesG.length===0){result[g.nombre]={kmAcum:0,rows:[],odoBase:base,odoActual:base};return;}
-
-    let p=base, acum=0;
-    const rows=mesG.map(r=>{
-      const kmDia=Math.max(0,r.lectura-p);
-      p=r.lectura; acum+=kmDia;
-      return{...r,kmDia,acum};
-    });
-    result[g.nombre]={kmAcum:acum,rows,odoBase:base,odoActual:mesG.slice(-1)[0].lectura};
-  });
-  return result;
-}
-
-// ═══════════════════════════════════════════════
-//  DRAW: GRÚAS
-// ═══════════════════════════════════════════════
-function drawGruas(){
-  const {mes,anio}=getPer('g');
-  const kmData=calcKMGruas(mes,anio);
-  const warnKM=KM_LIMIT*KM_WARN_P/100;
-  const dangKM=KM_LIMIT*KM_DANG_P/100;
-  const gruaNames=GRUAS.map(g=>g.nombre);
-
-  const totalKM  =gruaNames.reduce((a,g)=>a+(kmData[g]?.kmAcum||0),0);
-  const superadas=gruaNames.filter(g=>(kmData[g]?.kmAcum||0)>=KM_LIMIT).length;
-  const enRiesgo =gruaNames.filter(g=>{const k=kmData[g]?.kmAcum||0;return k>=warnKM&&k<KM_LIMIT;}).length;
-  const libres   =gruaNames.filter(g=>(kmData[g]?.kmAcum||0)<warnKM).length;
-  const now=new Date();
-  const diasMes=new Date(anio,mes+1,0).getDate();
-  const diaAct=(now.getMonth()===mes&&now.getFullYear()===anio)?now.getDate():diasMes;
-  const proy=diaAct>0?Math.round(totalKM/diaAct*diasMes):0;
-  const gruasLibres=gruaNames.filter(g=>(kmData[g]?.kmAcum||0)<warnKM);
-
-  // ── Alerts
-  let aHTML='';
-  gruaNames.forEach(g=>{
-    const km=kmData[g]?.kmAcum||0; const resta=KM_LIMIT-km; const pct=km/KM_LIMIT*100;
-    if(km>=KM_LIMIT){
-      aHTML+=`<div class="al al-r"><span class="al-ico">🚨</span><div class="al-body">
-        <strong>${g}</strong> — PENALIZACIÓN ACTIVA: ${km} km de ${KM_LIMIT} km.
-        <strong style="color:var(--danger)"> +${km-KM_LIMIT} km sobre el límite del contrato.</strong>
-        <br>⛔ No asignar más trabajos a esta grúa este mes.
-      </div></div>`;
-    } else if(km>=dangKM){
-      aHTML+=`<div class="al al-r"><span class="al-ico">🔴</span><div class="al-body">
-        <strong>${g}</strong> — PELIGRO: ${km} / ${KM_LIMIT} km (${pct.toFixed(0)}%). Solo quedan <strong>${resta} km</strong>.
-        ${gruasLibres.length?`<br>Redirigir trabajos a: <strong>${gruasLibres.join(' · ')}</strong>`:''}
-      </div></div>`;
-    } else if(km>=warnKM){
-      aHTML+=`<div class="al al-y"><span class="al-ico">⚠️</span><div class="al-body">
-        <strong>${g}</strong> — Atención: ${km} / ${KM_LIMIT} km (${pct.toFixed(0)}%). Quedan <strong>${resta} km</strong>.
-        ${gruasLibres.length?`Priorizar: <strong>${gruasLibres.join(' · ')}</strong>`:''}
-      </div></div>`;
-    }
-  });
-  if(gruasLibres.length&&aHTML){
-    aHTML+=`<div class="al al-g"><span class="al-ico">✅</span><div class="al-body">
-      <strong>Grúas disponibles este mes:</strong> ${gruasLibres.join(' · ')} — Priorizar para evitar penalizaciones.
-    </div></div>`;
+new Chart(document.getElementById('barChart'),{
+  type:'bar',
+  data:{
+    labels:["GR\u00daA 1", "GR\u00daA 2", "GR\u00daA 3", "GR\u00daA 4", "GR\u00daA 5", "GR\u00daA 6", "GR\u00daA 7", "GR\u00daA 8", "GR\u00daA 9", "GR\u00daA 10", "GR\u00daA 11", "GR\u00daA 12"],
+    datasets:[{label:'km recorridos',data:[42.0, 98.0, 162.0, 55.0, 137.0, 31.0, 112.0, 165.0, 78.0, 22.0, 0.0, 0.0],backgroundColor:["#00e676", "#ffa726", "#f44336", "#00e676", "#ffa726", "#00e676", "#ffa726", "#f44336", "#00e676", "#00e676", "#00e676", "#00e676"],borderRadius:4,borderSkipped:false}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{display:true,labels:{color:'#7a90b0',font:{size:11}}},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} km`}}},
+    scales:{x:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'}},y:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'},max:200}},
+    animation:{duration:900,easing:'easeOutQuart'}
   }
-  if(!aHTML) aHTML=`<div class="al al-g"><span class="al-ico">✅</span><div class="al-body">Todas las grúas dentro del límite de ${KM_LIMIT} km. Sin penalizaciones.</div></div>`;
-  document.getElementById('g-al').innerHTML=aHTML;
+});
 
-  // ── KPIs
-  document.getElementById('g-kpi').innerHTML=`
-    <div class="kpi kb"><div class="kpi-l">KM Totales Mes</div><div class="kpi-v cb">${totalKM}<span class="kpi-u">km</span></div><div class="kpi-s">Suma todas las grúas</div></div>
-    <div class="kpi ${superadas>0?'kd':'ko'}"><div class="kpi-l">Grúas Penalizadas</div><div class="kpi-v ${superadas>0?'cr':'cg'}">${superadas}</div><div class="kpi-s">Sobre ${KM_LIMIT} km</div></div>
-    <div class="kpi ${enRiesgo>0?'kw':'ko'}"><div class="kpi-l">En Riesgo ≥${KM_WARN_P}%</div><div class="kpi-v ${enRiesgo>0?'cw':'cg'}">${enRiesgo}</div><div class="kpi-s">Sobre ${Math.round(warnKM)} km acum.</div></div>
-    <div class="kpi ko"><div class="kpi-l">Grúas Disponibles</div><div class="kpi-v cg">${libres}</div><div class="kpi-s">Con KM libres</div></div>
-    <div class="kpi kb"><div class="kpi-l">Proyección Fin Mes</div><div class="kpi-v cb">${proy}<span class="kpi-u">km</span></div><div class="kpi-s">Estimado día ${diasMes}</div></div>
-    <div class="kpi"><div class="kpi-l">Límite Contrato</div><div class="kpi-v">${KM_LIMIT}<span class="kpi-u">km</span></div><div class="kpi-s">Por grúa / mes</div></div>
-  `;
-
-  // ── GRÚA CARDS
-  const sortedGruas=[...gruaNames].sort((a,b)=>(kmData[b]?.kmAcum||0)-(kmData[a]?.kmAcum||0));
-  let cardsHTML='';
-  sortedGruas.forEach(g=>{
-    const km=kmData[g]?.kmAcum||0;
-    const odoBase=kmData[g]?.odoBase||0;
-    const odoAct=kmData[g]?.odoActual||0;
-    const pct=Math.min(100,km/KM_LIMIT*100);
-    const resta=Math.max(0,KM_LIMIT-km);
-    const extra=km>KM_LIMIT?km-KM_LIMIT:0;
-    const isO=km>=KM_LIMIT,isD=km>=dangKM&&!isO,isW=km>=warnKM&&!isD&&!isO;
-    const cardCls=isO||isD?'gc-r':isW?'gc-y':'';
-    const fillCls=isO||isD?'gf-dang':isW?'gf-warn':'gf-ok';
-    const badgeCls=isO||isD?'gb-dang':isW?'gb-warn':'gb-ok';
-    const badgeTxt=isO?'PENALIZADO':isD?'PELIGRO':isW?'RIESGO':'OK';
-    const valCol=isO||isD?'var(--danger)':isW?'#e3a21a':'var(--ok)';
-    cardsHTML+=`
-      <div class="grua-card ${cardCls}">
-        <div class="gc-header">
-          <span class="gc-name">${g}</span>
-          <span class="gc-badge ${badgeCls}">${badgeTxt}</span>
-        </div>
-        <div class="gc-km" style="color:${valCol}">
-          ${km} km / ${KM_LIMIT} km &nbsp;·&nbsp;
-          ${extra>0?`<strong>+${extra} km PENALIZACIÓN</strong>`:`${resta} km restantes`}
-        </div>
-        <div class="gc-track"><div class="gc-fill ${fillCls}" style="width:${pct}%"></div></div>
-        <div class="gc-foot">
-          <span style="color:${valCol}">${pct.toFixed(1)}% del límite</span>
-          <span>${isO?'⛔ No usar':isD?'🔴 Reducir uso':isW?'⚠️ Supervisar':'✅ Disponible'}</span>
-        </div>
-        <div class="gc-odo">Odómetro: ${odoBase.toLocaleString('es-CL')} → ${odoAct.toLocaleString('es-CL')} km</div>
-      </div>`;
-  });
-  document.getElementById('g-cards').innerHTML=cardsHTML||'<div class="empty"><div class="empty-ico">📋</div><p>Sin datos para el período seleccionado</p></div>';
-
-  // ── Charts
-  const barColors=gruaNames.map(g=>{const k=kmData[g]?.kmAcum||0;return k>=KM_LIMIT?'rgba(248,81,73,0.75)':k>=warnKM?'rgba(210,153,34,0.75)':'rgba(37,99,235,0.65)';});
-  mkCH('ch-kb',{type:'bar',data:{
-    labels:gruaNames,
-    datasets:[
-      {label:'KM acum.',data:gruaNames.map(g=>kmData[g]?.kmAcum||0),backgroundColor:barColors,borderColor:barColors.map(c=>c.replace(/[\d.]+\)$/,'1)')),borderWidth:1,borderRadius:5},
-      {label:`Límite ${KM_LIMIT}km`,data:gruaNames.map(()=>KM_LIMIT),backgroundColor:'rgba(255,255,255,0.04)',borderColor:'rgba(255,255,255,0.15)',borderWidth:1,borderRadius:5}
-    ]
-  },options:{responsive:true,plugins:{legend:lgStyle()},scales:{x:axStyle(),y:{...axStyle(),max:Math.max(KM_LIMIT+30,Math.max(...gruaNames.map(g=>kmData[g]?.kmAcum||0))+20,30)}}}});
-
-  const pieColors=['rgba(37,99,235,0.75)','rgba(59,130,246,0.75)','rgba(96,165,250,0.75)','rgba(147,197,253,0.6)','rgba(210,153,34,0.75)','rgba(248,81,73,0.75)','rgba(63,185,80,0.75)','rgba(139,92,246,0.75)'];
-  mkCH('ch-kp',{type:'doughnut',data:{
-    labels:gruaNames,
-    datasets:[{data:gruaNames.map(g=>kmData[g]?.kmAcum||0),backgroundColor:pieColors,borderColor:'var(--surf)',borderWidth:2}]
-  },options:{responsive:true,plugins:{legend:lgStyle()},cutout:'58%'}});
-
-  // ── Table
-  const allRows=[];
-  gruaNames.forEach(g=>(kmData[g]?.rows||[]).forEach(r=>allRows.push({...r,grua:g})));
-  allRows.sort((a,b)=>b.fecha.localeCompare(a.fecha));
-  let tHTML='';
-  allRows.forEach(r=>{
-    const resta=KM_LIMIT-r.acum;
-    const isO=r.acum>=KM_LIMIT,isD=r.acum>=dangKM&&!isO,isW=r.acum>=warnKM&&!isD&&!isO;
-    const lbl=isO?'PENALIZADO':isD?'PELIGRO':isW?'RIESGO':'OK';
-    const cls=isO||isD?'bdg-dang':isW?'bdg-warn':'bdg-ok';
-    const col=isO||isD?'var(--danger)':isW?'#e3a21a':'var(--blue2)';
-    tHTML+=`<tr>
-      <td class="mono">${r.fecha}</td>
-      <td><strong>${r.grua}</strong></td>
-      <td class="mono">${r.lectura.toLocaleString('es-CL')} km</td>
-      <td class="mono">${r.kmDia} km</td>
-      <td class="mono">${r.acum} km</td>
-      <td class="mono" style="color:${col}">${resta<0?'+'+Math.abs(resta)+' EXTRA':resta+' km'}</td>
-      <td><span class="bdg ${cls}">${lbl}</span></td>
-      <td style="color:var(--muted);font-size:11px">${r.observacion||'—'}</td>
-      <td style="color:var(--muted);font-size:11px">${r.supervisor||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('g-tb').innerHTML=tHTML||`<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">Sin registros para el período seleccionado</td></tr>`;
-}
-
-// ═══════════════════════════════════════════════
-//  DRAW: COMBUSTIBLE
-// ═══════════════════════════════════════════════
-function drawFuel(){
-  const {mes,anio}=getPer('f');
-  const period=FUEL.filter(r=>inPer(r.fecha,mes,anio));
-
-  // Stock acumulado = stockInicial + todas las cargas históricas
-  const stockAT={};
-  VEHS.forEach(v=>stockAT[v.nombre]=v.stock_inicial_L||0);
-  FUEL.forEach(r=>stockAT[r.vehiculo]=(stockAT[r.vehiculo]||0)+r.litros);
-  const CAP={};
-  VEHS.forEach(v=>CAP[v.nombre]=Math.max((v.stock_inicial_L||100)*4,400));
-
-  const totalStock=Object.values(stockAT).reduce((a,b)=>a+b,0);
-  const totalCarga=period.reduce((a,r)=>a+r.litros,0);
-  const vNames=VEHS.map(v=>v.nombre);
-  const criticos=vNames.filter(v=>stockAT[v]/CAP[v]*100<COMB_CRIT_P).length;
-  const bajos   =vNames.filter(v=>{const p=stockAT[v]/CAP[v]*100;return p>=COMB_CRIT_P&&p<COMB_WARN_P;}).length;
-
-  // ── Alerts
-  let aHTML='';
-  vNames.forEach(v=>{
-    const p=stockAT[v]/(CAP[v])*100;
-    if(p<COMB_CRIT_P) aHTML+=`<div class="al al-r"><span class="al-ico">🚨</span><div class="al-body"><strong>${v}</strong> — Stock CRÍTICO: ${Math.round(stockAT[v])} L. Abastecer de inmediato.</div></div>`;
-    else if(p<COMB_WARN_P) aHTML+=`<div class="al al-y"><span class="al-ico">⚠️</span><div class="al-body"><strong>${v}</strong> — Stock BAJO: ${Math.round(stockAT[v])} L (${p.toFixed(0)}%). Planificar carga.</div></div>`;
-  });
-  if(!aHTML) aHTML=`<div class="al al-g"><span class="al-ico">✅</span><div class="al-body">Todos los equipos con stock en rango normal.</div></div>`;
-  document.getElementById('f-al').innerHTML=aHTML;
-
-  // ── KPIs
-  document.getElementById('f-kpi').innerHTML=`
-    <div class="kpi kb"><div class="kpi-l">Total Cargado (Período)</div><div class="kpi-v cb">${Math.round(totalCarga)}<span class="kpi-u">L</span></div><div class="kpi-s">Combustible abastecido</div></div>
-    <div class="kpi kb"><div class="kpi-l">Stock Acumulado Total</div><div class="kpi-v cb">${Math.round(totalStock)}<span class="kpi-u">L</span></div><div class="kpi-s">Todos los equipos</div></div>
-    <div class="kpi ${criticos>0?'kd':bajos>0?'kw':'ko'}"><div class="kpi-l">Equipos con Alerta</div><div class="kpi-v ${criticos>0?'cr':bajos>0?'cw':'cg'}">${criticos+bajos}</div><div class="kpi-s">${criticos} críticos · ${bajos} bajos</div></div>
-    <div class="kpi kb"><div class="kpi-l">Cargas registradas</div><div class="kpi-v cb">${period.length}</div><div class="kpi-s">En el período</div></div>
-  `;
-
-  // ── Fuel level bars
-  let lvl='';
-  vNames.forEach(v=>{
-    const s=Math.max(0,stockAT[v]||0), cap=CAP[v];
-    const pct=Math.min(100,s/cap*100);
-    const grad=pct<COMB_CRIT_P?'linear-gradient(90deg,#f85149,#cf2828)':pct<COMB_WARN_P?'linear-gradient(90deg,#d29922,#b8841c)':'linear-gradient(90deg,#2563eb,#1d4ed8)';
-    const col=pct<COMB_CRIT_P?'var(--danger)':pct<COMB_WARN_P?'#e3a21a':'var(--blue2)';
-    const vObj=VEHS.find(x=>x.nombre===v)||{};
-    lvl+=`
-      <div class="fuel-item">
-        <div class="fi-head">
-          <span class="fi-name">${v}</span>
-          <span class="fi-val" style="color:${col}">${Math.round(s)} L acumulado</span>
-        </div>
-        <div class="fi-bar">
-          <div class="fi-fill" style="width:${pct}%;background:${grad}"></div>
-          <div class="fi-lbl">${pct.toFixed(0)}%</div>
-        </div>
-        <div class="fi-detail">Stock inicial mes: ${vObj.stock_inicial_L||0} L</div>
-      </div>`;
-  });
-  document.getElementById('f-lv').innerHTML=lvl||'<div class="empty"><p>Sin equipos configurados</p></div>';
-
-  // ── Chart cargas
-  const cargasEq={};vNames.forEach(v=>cargasEq[v]=0);
-  period.forEach(r=>cargasEq[r.vehiculo]=(cargasEq[r.vehiculo]||0)+r.litros);
-  mkCH('ch-f',{type:'bar',data:{
-    labels:vNames.map(v=>v.replace('Vehículo ','V').replace('Tractor ','T')),
-    datasets:[{label:'Litros cargados',data:vNames.map(v=>cargasEq[v]||0),
-      backgroundColor:'rgba(37,99,235,0.6)',borderColor:'#3b82f6',borderWidth:1,borderRadius:5}]
-  },options:{responsive:true,plugins:{legend:lgStyle()},scales:{x:axStyle(),y:axStyle()}}});
-
-  // ── Table
-  let tHTML='';
-  [...period].sort((a,b)=>b.fecha.localeCompare(a.fecha)).forEach(r=>{
-    tHTML+=`<tr>
-      <td class="mono">${r.fecha}</td>
-      <td><strong>${r.vehiculo}</strong></td>
-      <td class="mono"><span class="bdg bdg-blue">${r.litros} L</span></td>
-      <td style="color:var(--muted)">${r.responsable||'—'}</td>
-    </tr>`;
-  });
-  document.getElementById('f-tb').innerHTML=tHTML||`<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted)">Sin cargas en el período</td></tr>`;
-}
-
-// ═══════════════════════════════════════════════
-//  DRAW: RESUMEN
-// ═══════════════════════════════════════════════
-function drawRes(){
-  const now=new Date(); const mes=now.getMonth(),anio=now.getFullYear();
-  const warnKM=KM_LIMIT*KM_WARN_P/100;
-  const gruaNames=GRUAS.map(g=>g.nombre);
-  const vNames=VEHS.map(v=>v.nombre);
-
-  const stockAT={};
-  VEHS.forEach(v=>stockAT[v.nombre]=v.stock_inicial_L||0);
-  FUEL.forEach(r=>stockAT[r.vehiculo]=(stockAT[r.vehiculo]||0)+r.litros);
-  const CAP={}; VEHS.forEach(v=>CAP[v.nombre]=Math.max((v.stock_inicial_L||100)*4,400));
-  const totalStock=Object.values(stockAT).reduce((a,b)=>a+b,0);
-  const criticos=vNames.filter(v=>stockAT[v]/CAP[v]*100<COMB_CRIT_P).length;
-  const bajos=vNames.filter(v=>{const p=stockAT[v]/CAP[v]*100;return p>=COMB_CRIT_P&&p<COMB_WARN_P;}).length;
-
-  const kmData=calcKMGruas(mes,anio);
-  const totalKM=gruaNames.reduce((a,g)=>a+(kmData[g]?.kmAcum||0),0);
-  const enRiesgo=gruaNames.filter(g=>(kmData[g]?.kmAcum||0)>=warnKM).length;
-
-  document.getElementById('s-st').textContent=Math.round(totalStock).toLocaleString('es-CL');
-  document.getElementById('s-km').textContent=totalKM;
-  const scr=document.getElementById('s-cr');
-  scr.textContent=criticos+bajos; scr.className='si-v '+(criticos>0?'cr':bajos>0?'cw':'cg');
-  const sri=document.getElementById('s-ri');
-  sri.textContent=enRiesgo; sri.className='si-v '+(enRiesgo>0?'cw':'cg');
-
-  // Fuel chart
-  const fuelMes=FUEL.filter(r=>inPer(r.fecha,mes,anio));
-  const cEq={};vNames.forEach(v=>cEq[v]=0);
-  fuelMes.forEach(r=>cEq[r.vehiculo]=(cEq[r.vehiculo]||0)+r.litros);
-  mkCH('ch-rf',{type:'bar',data:{
-    labels:vNames.map(v=>v.replace('Vehículo ','V').replace('Tractor ','T')),
-    datasets:[
-      {label:'Cargado (L)',data:vNames.map(v=>cEq[v]||0),backgroundColor:'rgba(37,99,235,0.6)',borderColor:'#3b82f6',borderWidth:1,borderRadius:5},
-      {label:'Stock acum.',data:vNames.map(v=>stockAT[v]||0),backgroundColor:'rgba(63,185,80,0.3)',borderColor:'#3fb950',borderWidth:1,borderRadius:5}
-    ]
-  },options:{responsive:true,plugins:{legend:lgStyle()},scales:{x:axStyle(),y:axStyle()}}});
-
-  const barC=gruaNames.map(g=>{const k=kmData[g]?.kmAcum||0;return k>=KM_LIMIT?'rgba(248,81,73,0.75)':k>=warnKM?'rgba(210,153,34,0.75)':'rgba(37,99,235,0.65)';});
-  mkCH('ch-rk',{type:'bar',data:{
-    labels:gruaNames,
-    datasets:[
-      {label:'KM acum.',data:gruaNames.map(g=>kmData[g]?.kmAcum||0),backgroundColor:barC,borderColor:barC.map(c=>c.replace(/[\d.]+\)$/,'1)')),borderWidth:1,borderRadius:5},
-      {label:`Límite ${KM_LIMIT}`,data:gruaNames.map(()=>KM_LIMIT),backgroundColor:'rgba(255,255,255,0.04)',borderColor:'rgba(255,255,255,0.15)',borderWidth:1,borderRadius:5}
-    ]
-  },options:{responsive:true,plugins:{legend:lgStyle()},scales:{x:axStyle(),y:{...axStyle(),max:200}}}});
-
-  let aHTML='';
-  vNames.forEach(v=>{
-    const p=stockAT[v]/CAP[v]*100;
-    if(p<COMB_CRIT_P) aHTML+=`<div class="al al-r"><span class="al-ico">⛽</span><div class="al-body"><strong>${v}</strong> — Stock CRÍTICO: ${Math.round(stockAT[v])} L (${p.toFixed(0)}%)</div></div>`;
-    else if(p<COMB_WARN_P) aHTML+=`<div class="al al-y"><span class="al-ico">⛽</span><div class="al-body"><strong>${v}</strong> — Stock BAJO: ${Math.round(stockAT[v])} L (${p.toFixed(0)}%)</div></div>`;
-  });
-  gruaNames.forEach(g=>{
-    const km=kmData[g]?.kmAcum||0,resta=KM_LIMIT-km,pct=km/KM_LIMIT*100;
-    if(km>=KM_LIMIT) aHTML+=`<div class="al al-r"><span class="al-ico">🏗️</span><div class="al-body"><strong>${g}</strong> — PENALIZACIÓN: ${km} km, +${km-KM_LIMIT} km sobre límite.</div></div>`;
-    else if(pct>=KM_DANG_P) aHTML+=`<div class="al al-r"><span class="al-ico">🏗️</span><div class="al-body"><strong>${g}</strong> — Peligro: ${km}/${KM_LIMIT} km. Solo ${resta} km disponibles.</div></div>`;
-    else if(pct>=KM_WARN_P) aHTML+=`<div class="al al-y"><span class="al-ico">🏗️</span><div class="al-body"><strong>${g}</strong> — Atención: ${km}/${KM_LIMIT} km. Quedan ${resta} km.</div></div>`;
-  });
-  if(!aHTML) aHTML='<div class="al al-g"><span class="al-ico">✅</span><div class="al-body">Sin alertas activas. Operación normal en todos los equipos.</div></div>';
-  document.getElementById('r-al').innerHTML=aHTML;
-}
-
-// ═══════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════
-initSel();
-loadData();
+new Chart(document.getElementById('donutChart'),{
+  type:'doughnut',
+  data:{
+    labels:['OK','Precaución','Alerta','Límite'],
+    datasets:[{data:[7, 3, 0, 2],backgroundColor:['#00e676','#ffa726','#ffca28','#f44336'],borderColor:'#101626',borderWidth:3,hoverOffset:8}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:true,cutout:'62%',
+    plugins:{legend:{position:'right',labels:{color:'#7a90b0',font:{size:12},padding:14,usePointStyle:true}}},
+    animation:{animateRotate:true,duration:1000,easing:'easeOutQuart'}
+  }
+});
 </script>
 </body>
 </html>
