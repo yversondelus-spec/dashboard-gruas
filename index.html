@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#0b0f1a;--bg2:#101626;--bg3:#141c2e;--card:#131929;--card2:#1a2235;
+    --bg:#0b0f1a;--bg2:#101626;--bg3:#141c2e;--card:#131929;
     --border:#1e2d45;--border2:#243450;
     --ok:#00e676;--ok-dim:#00c85380;
     --warn:#ffa726;--warn-dim:#ff980050;
@@ -21,6 +21,7 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',sans-serif;min-height:100vh;}
 
+  /* HEADER */
   .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
   .logo-block{display:flex;align-items:center;gap:12px;}
   .logo-badge{width:40px;height:40px;background:linear-gradient(135deg,#00b8d9,#0068b5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:#fff;letter-spacing:1px;}
@@ -33,13 +34,17 @@
   .htime-main{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;}
   .htime-sub{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
 
+  /* TABS */
   .tabs{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;}
   .tab{padding:14px 20px;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px;}
   .tab:hover{color:var(--text);}
   .tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
 
   .main{padding:20px 24px;}
 
+  /* KPI */
   .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
   .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;animation:fadeUp .4s ease both;}
   .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
@@ -47,6 +52,7 @@
   .kpi-card.c-ok::before{background:var(--ok);}
   .kpi-card.c-warn::before{background:var(--alert);}
   .kpi-card.c-limit::before{background:var(--limit);}
+  .kpi-card.c-orange::before{background:var(--warn);}
   @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
   .kpi-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;}
   .kpi-value{font-family:'Rajdhani',sans-serif;font-size:48px;font-weight:700;line-height:1;margin-bottom:4px;}
@@ -54,23 +60,23 @@
   .kpi-card.c-ok .kpi-value{color:var(--ok);}
   .kpi-card.c-warn .kpi-value{color:var(--alert);}
   .kpi-card.c-limit .kpi-value{color:var(--limit);}
+  .kpi-card.c-orange .kpi-value{color:var(--warn);}
   .kpi-sub{font-size:12px;color:var(--text2);}
 
+  /* SECTION */
   .section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
   .section-title{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
   .section-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);}
+  .section-dot.orange{background:var(--warn);}
 
+  /* CRANE CARDS */
   .crane-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
   .crane-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:transform .15s,border-color .15s;animation:fadeUp .4s ease both;cursor:default;}
   .crane-card:hover{transform:translateY(-2px);}
-  .crane-card.s-ok{border-color:var(--ok-dim);}
-  .crane-card.s-ok:hover{border-color:var(--ok);}
-  .crane-card.s-precaution{border-color:var(--warn-dim);}
-  .crane-card.s-precaution:hover{border-color:var(--warn);}
-  .crane-card.s-alert{border-color:var(--alert-dim);}
-  .crane-card.s-alert:hover{border-color:var(--alert);}
-  .crane-card.s-limit{border-color:var(--limit-dim);}
-  .crane-card.s-limit:hover{border-color:var(--limit);}
+  .crane-card.s-ok{border-color:var(--ok-dim);}.crane-card.s-ok:hover{border-color:var(--ok);}
+  .crane-card.s-precaution{border-color:var(--warn-dim);}.crane-card.s-precaution:hover{border-color:var(--warn);}
+  .crane-card.s-alert{border-color:var(--alert-dim);}.crane-card.s-alert:hover{border-color:var(--alert);}
+  .crane-card.s-limit{border-color:var(--limit-dim);}.crane-card.s-limit:hover{border-color:var(--limit);}
   .crane-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
   .crane-name{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;}
   .crane-plate{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:10px;}
@@ -91,14 +97,43 @@
   .crane-footer{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);}
   .crane-footer .disp{color:var(--cyan);font-weight:600;}
 
+  /* VEHICLE CARDS (combustible) */
+  .vehicle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .vehicle-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:transform .15s,border-color .15s;animation:fadeUp .4s ease both;}
+  .vehicle-card:hover{transform:translateY(-2px);}
+  .vehicle-card.v-ok{border-color:var(--ok-dim);}.vehicle-card.v-ok:hover{border-color:var(--ok);}
+  .vehicle-card.v-warn{border-color:var(--warn-dim);}.vehicle-card.v-warn:hover{border-color:var(--warn);}
+  .vehicle-card.v-low{border-color:var(--limit-dim);}.vehicle-card.v-low:hover{border-color:var(--limit);}
+  .vehicle-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+  .vehicle-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}
+  .vehicle-plate{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:8px;}
+  .vehicle-litros{display:flex;align-items:baseline;gap:4px;margin-bottom:8px;}
+  .vehicle-litros-val{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;line-height:1;}
+  .vehicle-litros-of{font-size:11px;color:var(--text2);}
+  .vehicle-footer{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);}
+  .vehicle-footer .comb-tag{color:var(--warn);font-weight:600;}
+
+  /* STOCK BAR */
+  .stock-banner{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:24px;}
+  .stock-val{font-family:'Rajdhani',sans-serif;font-size:42px;font-weight:700;color:var(--warn);line-height:1;}
+  .stock-label{font-size:11px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
+  .stock-bar-wrap{flex:1;}
+  .stock-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:6px;}
+  .stock-prog{height:10px;background:var(--prog-bg);border-radius:6px;overflow:hidden;}
+  .stock-prog-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--warn),var(--alert));transition:width .8s ease;}
+
+  /* CHARTS */
   .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
   .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;}
   .chart-title{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
   canvas{max-height:240px;}
 
-  .updated-badge{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;margin-bottom:16px;display:inline-block;}
-
-  @media(max-width:900px){.crane-grid{grid-template-columns:repeat(2,1fr);}.kpi-row{grid-template-columns:repeat(2,1fr);}.charts-row{grid-template-columns:1fr;}}
+  @media(max-width:900px){
+    .crane-grid,.vehicle-grid{grid-template-columns:repeat(2,1fr);}
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .charts-row{grid-template-columns:1fr;}
+    .stock-banner{flex-wrap:wrap;}
+  }
 </style>
 </head>
 <body>
@@ -114,255 +149,274 @@
   <div class="header-right">
     <div class="live-badge"><div class="live-dot"></div>LIVE</div>
     <div>
-      <div class="htime-main">18:19</div>
+      <div class="htime-main">18:27</div>
       <div class="htime-sub">Actualizado: 21/03/2026</div>
     </div>
   </div>
 </header>
 
 <nav class="tabs">
-  <div class="tab active">🏗️ GRÚAS LEASING</div>
-  <div class="tab">🔴 COMBUSTIBLE</div>
+  <div class="tab active" onclick="switchTab('gruas',this)">🏗️ GRÚAS LEASING</div>
+  <div class="tab" onclick="switchTab('comb',this)">🔴 COMBUSTIBLE</div>
 </nav>
 
 <div class="main">
 
-  <div class="kpi-row">
-    <div class="kpi-card c-total" style="animation-delay:.05s">
-      <div class="kpi-label">Total Grúas</div>
-      <div class="kpi-value">12</div>
-      <div class="kpi-sub">10 con datos este mes</div>
-    </div>
-    <div class="kpi-card c-ok" style="animation-delay:.1s">
-      <div class="kpi-label">Estado OK</div>
-      <div class="kpi-value">7</div>
-      <div class="kpi-sub">bajo 60% del límite</div>
-    </div>
-    <div class="kpi-card c-warn" style="animation-delay:.15s">
-      <div class="kpi-label">En Alerta</div>
-      <div class="kpi-value">0</div>
-      <div class="kpi-sub">entre 60% y 100%</div>
-    </div>
-    <div class="kpi-card c-limit" style="animation-delay:.2s">
-      <div class="kpi-label">Límite Superado</div>
-      <div class="kpi-value">2</div>
-      <div class="kpi-sub">≥ 160 km este mes</div>
-    </div>
-  </div>
+  <!-- ── TAB GRÚAS ────────────────────────────────────────── -->
+  <div class="tab-content active" id="tab-gruas">
 
-  <div class="section">
-    <div class="section-title"><span class="section-dot"></span>ESTADO DE GRÚAS — KM RECORRIDOS ESTE MES (LÍMITE 160 KM)</div>
-    <div class="crane-grid">
-      
+    <div class="kpi-row">
+      <div class="kpi-card c-total" style="animation-delay:.05s">
+        <div class="kpi-label">Total Grúas</div>
+        <div class="kpi-value">12</div>
+        <div class="kpi-sub">10 con datos este mes</div>
+      </div>
+      <div class="kpi-card c-ok" style="animation-delay:.1s">
+        <div class="kpi-label">Estado OK</div>
+        <div class="kpi-value">7</div>
+        <div class="kpi-sub">bajo 60% del límite</div>
+      </div>
+      <div class="kpi-card c-warn" style="animation-delay:.15s">
+        <div class="kpi-label">En Alerta</div>
+        <div class="kpi-value">0</div>
+        <div class="kpi-sub">entre 60% y 100%</div>
+      </div>
+      <div class="kpi-card c-limit" style="animation-delay:.2s">
+        <div class="kpi-label">Límite Superado</div>
+        <div class="kpi-value">2</div>
+        <div class="kpi-sub">≥ 160 km este mes</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="section-dot"></span>ESTADO DE GRÚAS — KM RECORRIDOS ESTE MES (LÍMITE 160 KM)</div>
+      <div class="crane-grid">
         <div class="crane-card s-ok" style="animation-delay:0.00s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 1</div>
-            <div class="status-badge ok">● OK</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 1</div><div class="status-badge ok">● OK</div></div>
           <div class="crane-plate">AB-1234</div>
-          <div class="crane-km">
-            <span class="crane-km-val">42</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">42</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill ok" style="width:26%"></div></div>
-          <div class="crane-footer">
-            <span>26% usado</span>
-            <span class="disp">118 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>26% usado</span><span class="disp">118 km disp.</span></div>
         </div>
         <div class="crane-card s-precaution" style="animation-delay:0.05s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 2</div>
-            <div class="status-badge precaution">● Precaución</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 2</div><div class="status-badge precaution">● Precaución</div></div>
           <div class="crane-plate">CD-5678</div>
-          <div class="crane-km">
-            <span class="crane-km-val">98</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">98</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill precaution" style="width:61%"></div></div>
-          <div class="crane-footer">
-            <span>61% usado</span>
-            <span class="disp">62 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>61% usado</span><span class="disp">62 km disp.</span></div>
         </div>
         <div class="crane-card s-limit" style="animation-delay:0.10s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 3</div>
-            <div class="status-badge limit">● Límite</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 3</div><div class="status-badge limit">● Límite</div></div>
           <div class="crane-plate">EF-9012</div>
-          <div class="crane-km">
-            <span class="crane-km-val">162</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">162</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill limit" style="width:100%"></div></div>
-          <div class="crane-footer">
-            <span>100% usado</span>
-            <span class="disp">0 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>100% usado</span><span class="disp">0 km disp.</span></div>
         </div>
         <div class="crane-card s-ok" style="animation-delay:0.15s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 4</div>
-            <div class="status-badge ok">● OK</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 4</div><div class="status-badge ok">● OK</div></div>
           <div class="crane-plate">GH-3456</div>
-          <div class="crane-km">
-            <span class="crane-km-val">55</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">55</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill ok" style="width:34%"></div></div>
-          <div class="crane-footer">
-            <span>34% usado</span>
-            <span class="disp">105 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>34% usado</span><span class="disp">105 km disp.</span></div>
         </div>
         <div class="crane-card s-precaution" style="animation-delay:0.20s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 5</div>
-            <div class="status-badge precaution">● Precaución</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 5</div><div class="status-badge precaution">● Precaución</div></div>
           <div class="crane-plate">IJ-7890</div>
-          <div class="crane-km">
-            <span class="crane-km-val">137</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">137</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill precaution" style="width:86%"></div></div>
-          <div class="crane-footer">
-            <span>86% usado</span>
-            <span class="disp">23 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>86% usado</span><span class="disp">23 km disp.</span></div>
         </div>
         <div class="crane-card s-ok" style="animation-delay:0.25s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 6</div>
-            <div class="status-badge ok">● OK</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 6</div><div class="status-badge ok">● OK</div></div>
           <div class="crane-plate">KL-1234</div>
-          <div class="crane-km">
-            <span class="crane-km-val">31</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">31</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill ok" style="width:19%"></div></div>
-          <div class="crane-footer">
-            <span>19% usado</span>
-            <span class="disp">129 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>19% usado</span><span class="disp">129 km disp.</span></div>
         </div>
         <div class="crane-card s-precaution" style="animation-delay:0.30s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 7</div>
-            <div class="status-badge precaution">● Precaución</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 7</div><div class="status-badge precaution">● Precaución</div></div>
           <div class="crane-plate">MN-5678</div>
-          <div class="crane-km">
-            <span class="crane-km-val">112</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">112</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill precaution" style="width:70%"></div></div>
-          <div class="crane-footer">
-            <span>70% usado</span>
-            <span class="disp">48 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>70% usado</span><span class="disp">48 km disp.</span></div>
         </div>
         <div class="crane-card s-limit" style="animation-delay:0.35s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 8</div>
-            <div class="status-badge limit">● Límite</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 8</div><div class="status-badge limit">● Límite</div></div>
           <div class="crane-plate">OP-9012</div>
-          <div class="crane-km">
-            <span class="crane-km-val">165</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">165</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill limit" style="width:100%"></div></div>
-          <div class="crane-footer">
-            <span>100% usado</span>
-            <span class="disp">0 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>100% usado</span><span class="disp">0 km disp.</span></div>
         </div>
         <div class="crane-card s-ok" style="animation-delay:0.40s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 9</div>
-            <div class="status-badge ok">● OK</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 9</div><div class="status-badge ok">● OK</div></div>
           <div class="crane-plate">QR-3456</div>
-          <div class="crane-km">
-            <span class="crane-km-val">78</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">78</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill ok" style="width:49%"></div></div>
-          <div class="crane-footer">
-            <span>49% usado</span>
-            <span class="disp">82 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>49% usado</span><span class="disp">82 km disp.</span></div>
         </div>
         <div class="crane-card s-ok" style="animation-delay:0.45s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 10</div>
-            <div class="status-badge ok">● OK</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 10</div><div class="status-badge ok">● OK</div></div>
           <div class="crane-plate">ST-7890</div>
-          <div class="crane-km">
-            <span class="crane-km-val">22</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">22</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill ok" style="width:14%"></div></div>
-          <div class="crane-footer">
-            <span>14% usado</span>
-            <span class="disp">138 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>14% usado</span><span class="disp">138 km disp.</span></div>
         </div>
         <div class="crane-card s-ok" style="animation-delay:0.50s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 11</div>
-            <div class="status-badge ok">● OK</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 11</div><div class="status-badge ok">● OK</div></div>
           <div class="crane-plate">UV-1234</div>
-          <div class="crane-km">
-            <span class="crane-km-val">0</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">0</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill ok" style="width:0%"></div></div>
-          <div class="crane-footer">
-            <span>0% usado</span>
-            <span class="disp">160 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>0% usado</span><span class="disp">160 km disp.</span></div>
         </div>
         <div class="crane-card s-ok" style="animation-delay:0.55s">
-          <div class="crane-header">
-            <div class="crane-name">GRÚA 12</div>
-            <div class="status-badge ok">● OK</div>
-          </div>
+          <div class="crane-header"><div class="crane-name">GRÚA 12</div><div class="status-badge ok">● OK</div></div>
           <div class="crane-plate">WX-5678</div>
-          <div class="crane-km">
-            <span class="crane-km-val">0</span>
-            <span class="crane-km-of">/ 160 km</span>
-          </div>
+          <div class="crane-km"><span class="crane-km-val">0</span><span class="crane-km-of">/ 160 km</span></div>
           <div class="prog-bar"><div class="prog-fill ok" style="width:0%"></div></div>
-          <div class="crane-footer">
-            <span>0% usado</span>
-            <span class="disp">160 km disp.</span>
-          </div>
+          <div class="crane-footer"><span>0% usado</span><span class="disp">160 km disp.</span></div>
+        </div></div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title"><span class="section-dot"></span>KM RECORRIDOS POR GRÚA ESTE MES</div>
+        <canvas id="barChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="section-dot"></span>DISTRIBUCIÓN DE ESTADO</div>
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── TAB COMBUSTIBLE ──────────────────────────────────── -->
+  <div class="tab-content" id="tab-comb">
+
+    <div class="kpi-row">
+      <div class="kpi-card c-total" style="animation-delay:.05s">
+        <div class="kpi-label">Stock Actual</div>
+        <div class="kpi-value">850</div>
+        <div class="kpi-sub">litros disponibles</div>
+      </div>
+      <div class="kpi-card c-orange" style="animation-delay:.1s">
+        <div class="kpi-label">Consumo del Mes</div>
+        <div class="kpi-value">1150</div>
+        <div class="kpi-sub">litros consumidos</div>
+      </div>
+      <div class="kpi-card c-ok" style="animation-delay:.15s">
+        <div class="kpi-label">Cargas del Mes</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">recargas realizadas</div>
+      </div>
+      <div class="kpi-card c-limit" style="animation-delay:.2s">
+        <div class="kpi-label">Vehículos Alerta</div>
+        <div class="kpi-value">2</div>
+        <div class="kpi-sub">consumo elevado</div>
+      </div>
+    </div>
+
+    <div class="stock-banner">
+      <div>
+        <div class="stock-label">Stock Total</div>
+        <div class="stock-val">850 L</div>
+      </div>
+      <div class="stock-bar-wrap">
+        <div class="stock-bar-label">
+          <span>0 L</span>
+          <span>Stock inicial: 2000 L</span>
         </div>
+        <div class="stock-prog">
+          <div class="stock-prog-fill" style="width:42%"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px;">42% restante del stock inicial</div>
+      </div>
     </div>
-  </div>
 
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title"><span class="section-dot"></span>KM RECORRIDOS POR GRÚA ESTE MES</div>
-      <canvas id="barChart"></canvas>
+    <div class="section">
+      <div class="section-title"><span class="section-dot orange"></span>CONSUMO POR VEHÍCULO ESTE MES</div>
+      <div class="vehicle-grid">
+        <div class="vehicle-card v-ok" style="animation-delay:0.00s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 1</div><div class="status-badge ok">● Normal</div></div>
+          <div class="vehicle-plate">AA-1234</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">142</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:66%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div>
+        <div class="vehicle-card v-ok" style="animation-delay:0.05s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 2</div><div class="status-badge ok">● Normal</div></div>
+          <div class="vehicle-plate">BB-5678</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">98</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:46%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div>
+        <div class="vehicle-card v-low" style="animation-delay:0.10s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 3</div><div class="status-badge limit">● Alto</div></div>
+          <div class="vehicle-plate">CC-9012</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">215</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill limit" style="width:100%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div>
+        <div class="vehicle-card v-ok" style="animation-delay:0.15s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 4</div><div class="status-badge ok">● Normal</div></div>
+          <div class="vehicle-plate">DD-3456</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">87</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:40%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div>
+        <div class="vehicle-card v-warn" style="animation-delay:0.20s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 5</div><div class="status-badge alert">● Moderado</div></div>
+          <div class="vehicle-plate">EE-7890</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">178</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill alert" style="width:83%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div>
+        <div class="vehicle-card v-ok" style="animation-delay:0.25s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 6</div><div class="status-badge ok">● Normal</div></div>
+          <div class="vehicle-plate">FF-1234</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">134</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:62%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div>
+        <div class="vehicle-card v-warn" style="animation-delay:0.30s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 7</div><div class="status-badge alert">● Moderado</div></div>
+          <div class="vehicle-plate">GG-5678</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">165</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill alert" style="width:77%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div>
+        <div class="vehicle-card v-ok" style="animation-delay:0.35s">
+          <div class="vehicle-header"><div class="vehicle-name">Vehículo 8</div><div class="status-badge ok">● Normal</div></div>
+          <div class="vehicle-plate">HH-9012</div>
+          <div class="vehicle-litros"><span class="vehicle-litros-val">131</span><span class="vehicle-litros-of">L consumidos</span></div>
+          <div class="prog-bar"><div class="prog-fill ok" style="width:61%"></div></div>
+          <div class="vehicle-footer"><span>Diesel</span><span class="comb-tag">🔴 Diesel</span></div>
+        </div></div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title"><span class="section-dot"></span>DISTRIBUCIÓN DE ESTADO</div>
-      <canvas id="donutChart"></canvas>
-    </div>
-  </div>
 
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title"><span class="section-dot orange"></span>LITROS CONSUMIDOS POR VEHÍCULO</div>
+        <canvas id="combBarChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span class="section-dot orange"></span>DISTRIBUCIÓN DE CONSUMO</div>
+        <canvas id="combDonutChart"></canvas>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// GRÚAS charts
 const limitLine = {
   id:'limitLine',
   afterDraw(chart){
@@ -376,29 +430,27 @@ Chart.register(limitLine);
 
 new Chart(document.getElementById('barChart'),{
   type:'bar',
-  data:{
-    labels:["GR\u00daA 1", "GR\u00daA 2", "GR\u00daA 3", "GR\u00daA 4", "GR\u00daA 5", "GR\u00daA 6", "GR\u00daA 7", "GR\u00daA 8", "GR\u00daA 9", "GR\u00daA 10", "GR\u00daA 11", "GR\u00daA 12"],
-    datasets:[{label:'km recorridos',data:[42.0, 98.0, 162.0, 55.0, 137.0, 31.0, 112.0, 165.0, 78.0, 22.0, 0.0, 0.0],backgroundColor:["#00e676", "#ffa726", "#f44336", "#00e676", "#ffa726", "#00e676", "#ffa726", "#f44336", "#00e676", "#00e676", "#00e676", "#00e676"],borderRadius:4,borderSkipped:false}]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:true,
-    plugins:{legend:{display:true,labels:{color:'#7a90b0',font:{size:11}}},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} km`}}},
-    scales:{x:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'}},y:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'},max:200}},
-    animation:{duration:900,easing:'easeOutQuart'}
-  }
+  data:{labels:["GR\u00daA 1", "GR\u00daA 2", "GR\u00daA 3", "GR\u00daA 4", "GR\u00daA 5", "GR\u00daA 6", "GR\u00daA 7", "GR\u00daA 8", "GR\u00daA 9", "GR\u00daA 10", "GR\u00daA 11", "GR\u00daA 12"],datasets:[{label:'km recorridos',data:[42.0, 98.0, 162.0, 55.0, 137.0, 31.0, 112.0, 165.0, 78.0, 22.0, 0.0, 0.0],backgroundColor:["#00e676", "#ffa726", "#f44336", "#00e676", "#ffa726", "#00e676", "#ffa726", "#f44336", "#00e676", "#00e676", "#00e676", "#00e676"],borderRadius:4,borderSkipped:false}]},
+  options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,labels:{color:'#7a90b0',font:{size:11}}},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} km`}}},scales:{x:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'}},y:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'},max:200}},animation:{duration:900,easing:'easeOutQuart'}}
 });
 
 new Chart(document.getElementById('donutChart'),{
   type:'doughnut',
-  data:{
-    labels:['OK','Precaución','Alerta','Límite'],
-    datasets:[{data:[7, 3, 0, 2],backgroundColor:['#00e676','#ffa726','#ffca28','#f44336'],borderColor:'#101626',borderWidth:3,hoverOffset:8}]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:true,cutout:'62%',
-    plugins:{legend:{position:'right',labels:{color:'#7a90b0',font:{size:12},padding:14,usePointStyle:true}}},
-    animation:{animateRotate:true,duration:1000,easing:'easeOutQuart'}
-  }
+  data:{labels:['OK','Precaución','Alerta','Límite'],datasets:[{data:[7, 3, 0, 2],backgroundColor:['#00e676','#ffa726','#ffca28','#f44336'],borderColor:'#101626',borderWidth:3,hoverOffset:8}]},
+  options:{responsive:true,maintainAspectRatio:true,cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#7a90b0',font:{size:12},padding:14,usePointStyle:true}}},animation:{animateRotate:true,duration:1000}}
+});
+
+// COMBUSTIBLE charts
+new Chart(document.getElementById('combBarChart'),{
+  type:'bar',
+  data:{labels:["Veh\u00edculo 1", "Veh\u00edculo 2", "Veh\u00edculo 3", "Veh\u00edculo 4", "Veh\u00edculo 5", "Veh\u00edculo 6", "Veh\u00edculo 7", "Veh\u00edculo 8"],datasets:[{label:'litros consumidos',data:[142, 98, 215, 87, 178, 134, 165, 131],backgroundColor:["#ffa726", "#ffca28", "#00b8d9", "#00e676", "#f44336", "#ab47bc", "#26c6da", "#66bb6a"],borderRadius:4,borderSkipped:false}]},
+  options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,labels:{color:'#7a90b0',font:{size:11}}},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} L`}}},scales:{x:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'}},y:{ticks:{color:'#7a90b0'},grid:{color:'#1e2d45'}}},animation:{duration:900,easing:'easeOutQuart'}}
+});
+
+new Chart(document.getElementById('combDonutChart'),{
+  type:'doughnut',
+  data:{labels:["Veh\u00edculo 1", "Veh\u00edculo 2", "Veh\u00edculo 3", "Veh\u00edculo 4", "Veh\u00edculo 5", "Veh\u00edculo 6", "Veh\u00edculo 7", "Veh\u00edculo 8"],datasets:[{data:[142, 98, 215, 87, 178, 134, 165, 131],backgroundColor:['#ffa726','#ffca28','#00b8d9','#00e676','#f44336','#ab47bc','#26c6da','#66bb6a','#ef5350','#29b6f6'],borderColor:'#101626',borderWidth:3,hoverOffset:8}]},
+  options:{responsive:true,maintainAspectRatio:true,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#7a90b0',font:{size:11},padding:10,usePointStyle:true}}},animation:{animateRotate:true,duration:1000}}
 });
 </script>
 </body>
