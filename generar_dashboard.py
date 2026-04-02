@@ -12,8 +12,19 @@ MESES_ES = {1:"Ene",2:"Feb",3:"Mar",4:"Abr",5:"May",6:"Jun",
 MESES_FULL = {1:"Enero",2:"Febrero",3:"Marzo",4:"Abril",5:"Mayo",6:"Junio",
               7:"Julio",8:"Agosto",9:"Septiembre",10:"Octubre",11:"Noviembre",12:"Diciembre"}
 
-# Linde = ALTAS (control crítico) — van primero y con más protagonismo
-# Royal = BAJAS (costo fijo)      — van en sección secundaria
+# ── ORDEN EXACTO SEGÚN COLUMNAS DEL EXCEL ─────────────────────────────────
+# Excel: Royal (cols 2-7) → Linde (cols 8-16) → Tractor (col 17)
+# Royal = BAJAS (costo fijo)
+# Linde = ALTAS (control crítico, costo variable)
+
+GRUAS_ROYAL = [
+    {"id":"ROYAL 9023",  "tipo":"BAJA", "empresa":"Royal Leasing"},
+    {"id":"ROYAL 9024",  "tipo":"BAJA", "empresa":"Royal Leasing"},
+    {"id":"ROYAL 9025",  "tipo":"BAJA", "empresa":"Royal Leasing"},
+    {"id":"ROYAL 9026",  "tipo":"BAJA", "empresa":"Royal Leasing"},
+    {"id":"ROYAL 9027",  "tipo":"BAJA", "empresa":"Royal Leasing"},
+    {"id":"ROYAL 9028",  "tipo":"BAJA", "empresa":"Royal Leasing"},
+]
 GRUAS_LINDE = [
     {"id":"LINDE 11728", "tipo":"ALTA", "empresa":"Linde Leasing"},
     {"id":"LINDE 11731", "tipo":"ALTA", "empresa":"Linde Leasing"},
@@ -25,24 +36,13 @@ GRUAS_LINDE = [
     {"id":"LINDE 11738", "tipo":"ALTA", "empresa":"Linde Leasing"},
     {"id":"LINDE 11739", "tipo":"ALTA", "empresa":"Linde Leasing"},
 ]
-GRUAS_ROYAL = [
-    {"id":"ROYAL 9023",  "tipo":"BAJA", "empresa":"Royal Leasing"},
-    {"id":"ROYAL 9024",  "tipo":"BAJA", "empresa":"Royal Leasing"},
-    {"id":"ROYAL 9025",  "tipo":"BAJA", "empresa":"Royal Leasing"},
-    {"id":"ROYAL 9026",  "tipo":"BAJA", "empresa":"Royal Leasing"},
-    {"id":"ROYAL 9027",  "tipo":"BAJA", "empresa":"Royal Leasing"},
-    {"id":"ROYAL 9028",  "tipo":"BAJA", "empresa":"Royal Leasing"},
+GRUAS_TRACTOR = [
     {"id":"TRACTOR EQUIPAJE","tipo":"MULA","empresa":"—"},
 ]
-GRUAS_ALL = GRUAS_LINDE + GRUAS_ROYAL
-GRUA_IDS  = [g["id"] for g in GRUAS_ALL]
 
-# Colores corporativos Aerosan Airport Services
-# Azul institucional + paleta de estado clara
-AEROSAN_BLUE   = "#003087"
-AEROSAN_BLUE2  = "#0055B3"
-AEROSAN_CYAN   = "#0099CC"
-AEROSAN_GRAY   = "#4A5568"
+# GRUA_IDS sigue el orden real del Excel: Royal → Linde → Tractor
+GRUAS_ALL = GRUAS_ROYAL + GRUAS_LINDE + GRUAS_TRACTOR
+GRUA_IDS  = [g["id"] for g in GRUAS_ALL]
 
 GRUA_COLORS_LINDE = {
     "LINDE 11728":"#0055B3","LINDE 11731":"#0066CC","LINDE 11732":"#0077DD",
@@ -68,7 +68,6 @@ def download_excel(url, label=""):
     return BytesIO(r.content)
 
 def leer_hoja_anual(excel_bytes, year):
-    """Lee hoja 'SEMANAS {year}', devuelve lista de rows con fecha y horómetros."""
     nombre = f"SEMANAS {year}"
     try:
         df = pd.read_excel(excel_bytes, sheet_name=nombre, header=None,
@@ -106,7 +105,6 @@ def leer_hoja_anual(excel_bytes, year):
     return rows
 
 def calcular_horas_semanales(rows):
-    """Horómetro acumulado → horas semana = lectura_actual - lectura_anterior."""
     prev = {gid: None for gid in GRUA_IDS}
     for row in rows:
         for gid in GRUA_IDS:
@@ -120,12 +118,6 @@ def calcular_horas_semanales(rows):
     return rows
 
 def periodo_key_label(fecha):
-    """
-    Determina el período 20→20 al que pertenece una fecha.
-    Retorna (key, label, inicio, fin).
-    día >= 20 → período empieza este mes
-    día <  20 → período empezó el mes anterior
-    """
     if fecha.day >= 20:
         inicio = date(fecha.year, fecha.month, 20)
         if fecha.month == 12:
@@ -144,7 +136,6 @@ def periodo_key_label(fecha):
     return key, label, inicio, fin
 
 def agrupar_por_periodo(rows):
-    """Agrupa horas semanales por período 20→20."""
     periodos = {}
     for row in rows:
         key, label, inicio, fin = periodo_key_label(row["fecha"])
@@ -165,7 +156,6 @@ def agrupar_por_periodo(rows):
     return periodos
 
 def sumar_periodos(periodos_imp, periodos_exp):
-    """Suma horas de importación + exportación por el mismo período."""
     todas_keys = set(list(periodos_imp.keys()) + list(periodos_exp.keys()))
     resultado  = {}
     for key in todas_keys:
@@ -239,7 +229,7 @@ def build_card(g, hrs_total, hrs_imp, hrs_exp, tiene_dato, idx, compact=False):
 def build_periodo_entry(p):
     # ── Linde (ALTAS — críticas) ──────────────────────────────────────────
     cards_linde = ""
-    ok_l = prec_l = alert_l = limit_l = sin_l = 0
+    ok_l = prec_l = alert_l = limit_l = 0
     bar_l_labels, bar_l_imp, bar_l_exp = [], [], []
 
     for i, g in enumerate(GRUAS_LINDE):
@@ -256,14 +246,13 @@ def build_periodo_entry(p):
         elif st["key"]=="precaution": prec_l  +=1
         elif st["key"]=="alert":      alert_l +=1
         elif st["key"]=="limit":      limit_l +=1
-        else:                         sin_l   +=1
 
     # ── Royal + Tractor (BAJAS — costo fijo) ─────────────────────────────
     cards_royal = ""
     ok_r = prec_r = alert_r = limit_r = 0
     bar_r_labels, bar_r_data, bar_r_colors = [], [], []
 
-    for i, g in enumerate(GRUAS_ROYAL):
+    for i, g in enumerate(GRUAS_ROYAL + GRUAS_TRACTOR):
         gid    = g["id"]
         hrs    = p["hrsporgid"][gid]
         tiene  = p["tiene_dato"][gid]
@@ -282,52 +271,34 @@ def build_periodo_entry(p):
     return {
         "label":   p["label"],
         "n_sem":   n_sem,
-        # KPIs Linde
         "ok_l":    ok_l,  "prec_l": prec_l, "alert_l": alert_l, "limit_l": limit_l,
-        # KPIs Royal
         "ok_r":    ok_r,  "prec_r": prec_r, "alert_r": alert_r, "limit_r": limit_r,
-        # Cards
         "cards_linde": cards_linde,
         "cards_royal": cards_royal,
-        # Chart Linde stacked (IMP + EXP)
         "bar_l_labels": bar_l_labels,
         "bar_l_imp":    bar_l_imp,
         "bar_l_exp":    bar_l_exp,
-        # Chart Royal simple
         "bar_r_labels": bar_r_labels,
         "bar_r_data":   bar_r_data,
         "bar_r_colors": bar_r_colors,
-        # Donut linde
         "donut_l": [ok_l, prec_l, alert_l, limit_l],
     }
-
-def make_selectors(data_keys_sorted, actual_key):
-    """data_keys_sorted = lista de keys ordenadas más reciente primero."""
-    opts = ""
-    for key in data_keys_sorted:
-        # Obtener label del primer entry que tenga esta key
-        sel = "selected" if key == actual_key else ""
-        opts += f'<option value="{key}" {sel}></option>'  # label se inyecta después
-    return opts
 
 # ── Main ───────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     if not SHEET_URL_IMP:
         print("ERROR: Variable SHEET_URL_IMPORT no configurada."); sys.exit(1)
 
-    now        = datetime.now()
-    hoy        = now.date()
+    now  = datetime.now()
+    hoy  = now.date()
 
-    # Descargar ambos Excel
     raw_imp = download_excel(SHEET_URL_IMP, "IMPORTACIONES")
     raw_exp = download_excel(SHEET_URL_EXP, "EXPORTACIONES") if SHEET_URL_EXP else None
 
-    # Leer y calcular horas por semana para cada año
     periodos_imp_total = {}
     periodos_exp_total = {}
 
     for year in [2024, 2025, 2026]:
-        # Importaciones
         raw_imp.seek(0)
         rows_imp = leer_hoja_anual(raw_imp, year)
         if rows_imp:
@@ -335,7 +306,6 @@ if __name__ == "__main__":
             for k, v in agrupar_por_periodo(rows_imp).items():
                 periodos_imp_total[k] = v
 
-        # Exportaciones
         if raw_exp:
             raw_exp.seek(0)
             rows_exp = leer_hoja_anual(raw_exp, year)
@@ -344,7 +314,6 @@ if __name__ == "__main__":
                 for k, v in agrupar_por_periodo(rows_exp).items():
                     periodos_exp_total[k] = v
 
-    # Si no hay exportaciones, usar ceros
     if not periodos_exp_total:
         print("  [INFO] Sin datos de exportaciones — se mostrará solo importaciones.")
         for k, v in periodos_imp_total.items():
@@ -355,28 +324,23 @@ if __name__ == "__main__":
                 "tiene_dato": {gid: False for gid in GRUA_IDS},
             }
 
-    # Combinar IMP + EXP
     periodos_merged = sumar_periodos(periodos_imp_total, periodos_exp_total)
 
     if not periodos_merged:
         print("ERROR: No se encontraron datos."); sys.exit(1)
 
-    # Construir entries para el JS
     gruas_js = {}
     for key, p in periodos_merged.items():
         if any(p["tiene_dato"].values()):
             gruas_js[key] = build_periodo_entry(p)
-            gruas_js[key]["label"] = p["label"]  # asegurar label
+            gruas_js[key]["label"] = p["label"]
 
-    # Keys ordenadas más reciente primero
     keys_sorted = sorted(gruas_js.keys(), reverse=True)
 
-    # Período actual
     actual_key, actual_label, _, _ = periodo_key_label(hoy)
     if actual_key not in gruas_js:
         actual_key = keys_sorted[0]
 
-    # Generar options con labels reales
     periodo_opts = ""
     for key in keys_sorted:
         sel   = "selected" if key == actual_key else ""
