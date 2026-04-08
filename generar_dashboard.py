@@ -66,12 +66,16 @@ def download_excel(url, label=""):
 
 def _parse_val(val):
     if pd.isna(val): return None
+    def _parse_val(val):
+    if pd.isna(val): return None
     if isinstance(val, str):
         v = val.strip()
-        return float(v) if v else None
+        try:
+            return float(v) if v else None
+        except ValueError:
+            return None
     try: return float(val)
     except: return None
-
 def leer_hoja_import(excel_bytes, year):
     """col0=Nº, col1=Fecha, cols2-7=Royal(skip), cols8-16=Linde(9 grúas)"""
     nombre = f"SEMANAS {year}"
