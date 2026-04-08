@@ -65,17 +65,19 @@ def download_excel(url, label=""):
     return BytesIO(r.content)
 
 def _parse_val(val):
-    if pd.isna(val): return None
-    def _parse_val(val):
-    if pd.isna(val): return None
+    if pd.isna(val):
+        return None
     if isinstance(val, str):
         v = val.strip()
         try:
             return float(v) if v else None
         except ValueError:
             return None
-    try: return float(val)
-    except: return None
+    try:
+        return float(val)
+    except:
+        return None
+
 def leer_hoja_import(excel_bytes, year):
     """col0=Nº, col1=Fecha, cols2-7=Royal(skip), cols8-16=Linde(9 grúas)"""
     nombre = f"SEMANAS {year}"
@@ -146,9 +148,9 @@ def agrupar_por_periodo(rows, grua_ids, hoy):
     periodos = {}
     for row in rows:
         fecha = row["fecha"]
-        if fecha > hoy: continue                       # ignorar fechas futuras
+        if fecha > hoy: continue
         key, label, inicio, fin = periodo_key_label(fecha)
-        if inicio > hoy: continue                      # ignorar períodos futuros
+        if inicio > hoy: continue
         if key not in periodos:
             periodos[key] = {
                 "key": key, "label": label,
@@ -286,7 +288,6 @@ if __name__ == "__main__":
 
     periodo_opts = ""
     for key in keys_sorted:
-        sel   = "selected" if key == actual_key else ""
         gruas_js[key]["label"]
         periodo_opts += f'<option value="{key}" {"selected" if key == actual_key else ""}>{gruas_js[key]["label"]}</option>'
 
