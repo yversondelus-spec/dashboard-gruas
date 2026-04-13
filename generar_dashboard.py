@@ -63,7 +63,7 @@ def leer_hoja_import(excel_bytes, year):
     try:
         df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
                            header=None, skiprows=5)
-    except ValueError:  # Hoja no existe
+    except ValueError:
         return []
     
     rows = []
@@ -77,7 +77,6 @@ def leer_hoja_import(excel_bytes, year):
             continue
         
         entry = {"fecha": fecha}
-        # LINDE comienza en columna I (posición 8)
         for i, g in enumerate(GRUAS_IMPORT):
             try:
                 entry[g["id"]] = _parse_val(row.iloc[8+i])
@@ -91,7 +90,7 @@ def leer_hoja_export(excel_bytes, year):
     try:
         df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
                            header=None, skiprows=5)
-    except ValueError:  # Hoja no existe
+    except ValueError:
         return []
     
     rows = []
@@ -105,7 +104,6 @@ def leer_hoja_export(excel_bytes, year):
             continue
         
         entry = {"fecha": fecha}
-        # Leer desde columna C en adelante (posición 2)
         for i, gid in enumerate(IDS_EXP):
             try:
                 entry[gid] = _parse_val(row.iloc[2+i])
@@ -176,8 +174,8 @@ def agrupar_por_periodo(rows, grua_ids, hoy):
         if key not in periodos:
             periodos[key] = {
                 "label": label,
-                "inicio": inicio,
-                "fin": fin,
+                "inicio": str(inicio),
+                "fin": str(fin),
                 "hrsporgid": {g:0 for g in grua_ids}
             }
         periodos[key]["hrsporgid"][gid] += hrs
@@ -213,7 +211,7 @@ def agrupar_por_periodo(rows, grua_ids, hoy):
 
     return periodos
 
-# ── FIX 3: Merge sin reset ─────────────────────────────────────────────────
+# ── FIX 3: Merge sin reset ──────────────────────────────────────��──────────
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
     all_rows = []
 
@@ -223,7 +221,6 @@ def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
         if rows:
             all_rows.extend(rows)
 
-    # FILTER para evitar NaT en el sort
     all_rows = [r for r in all_rows if isinstance(r["fecha"], date)]
     all_rows.sort(key=lambda x: x["fecha"])
 
@@ -231,7 +228,101 @@ def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
 
     return agrupar_por_periodo(all_rows, grua_ids, hoy)
 
-# ── MAIN ───────────────────────────────────────────────────────────────────
+# ── GENERAR DASHBOARD DATA ─────────────────────────────────────────────────
+def generar_dashboard_data(periodos_imp, periodos_exp, hoy):
+    """Convierte periodos a formato para dashboard HTML"""
+    
+    def procesar_periodo(periodos, grua_ids, limit_hrs=160):
+        result = {}
+        for key, p in periodos.items():
+            hrs_por_grua = p["hrsporgid"]
+            
+            ok = sum(1 for h in hrs_por_grua.values() if h and h < limit_hrs * 0.6)
+            prec = sum(1 for h in hrs_por_grua.values() if h and limit_hrs * 0.6 <= h < limit_hrs * 0.86)
+            alert = sum(1 for h in hrs_por_grua.values() if h and limit_hrs * 0.86 <= h < limit_hrs)
+            limit = sum(1 for h in hrs_por_grua.values() if h and h >= limit_hrs)
+            
+            # Cards HTML para grúas
+            cards_html = ""
+            for gid in grua_ids:
+                h = hrs_por_grua.get(gid, 0) or 0
+                pct = (h / limit_hrs) * 100 if limit_hrs > 0 else 0
+                
+                if h < limit_hrs * 0.6:
+                    status, badge = "s-ok", "ok"
+                    status_text = "✅ OK"
+                elif h < limit_hrs * 0.86:
+                    status, badge = "s-precaution", "precaution"
+                    status_text = "⚠️ Precaución"
+                elif h < limit_hrs:
+                    status, badge = "s-alert", "alert"
+                    status_text = "🔶 Alerta"
+                else:
+                    status, badge = "s-limit", "limit"
+                    status_text = "🔴 Límite"
+                
+                cards_html += f'''
+                <div class="crane-card {status}">
+                  <div class="crane-header">
+                    <div class="crane-name">{gid.split()[-1]}</div>
+                    <span class="status-badge {badge}">{status_text}</span>
+                  </div>
+                  <div class="crane-plate">{gid}</div>
+                  <div class="crane-km">
+                    <div class="crane-km-val">{h:.0f}</div>
+                    <div class="crane-km-of">/ {limit_hrs} hrs</div>
+                  </div>
+                  <div class="prog-bar">
+                    <div class="prog-fill {badge.replace('-','')}" style="width:{min(pct,100)}%"></div>
+                  </div>
+                  <div class="crane-footer">
+                    <span>{pct:.0f}%</span>
+                    <span class="disp">Disponible: {max(0, limit_hrs - h):.0f} hrs</span>
+                  </div>
+                </div>
+                '''
+            
+            # Bar chart data
+            bar_labels = list(hrs_por_grua.keys())
+            bar_data = [hrs_por_grua.get(g, 0) or 0 for g in bar_labels]
+            bar_labels = [g.split()[-1] for g in bar_labels]  # Solo número
+            
+            result[key] = {
+                "label": p["label"],
+                "inicio_label": p["inicio"],
+                "fin_label": p["fin"],
+                "ok": ok,
+                "prec": prec,
+                "alert": alert,
+                "limit": limit,
+                "cards": cards_html,
+                "bar_labels": bar_labels,
+                "bar_data": bar_data,
+                "n_sem": len([1 for h in hrs_por_grua.values() if h])
+            }
+        return result
+    
+    data_imp = procesar_periodo(periodos_imp, IDS_IMP)
+    data_exp = procesar_periodo(periodos_exp, IDS_EXP) if periodos_exp else {}
+    
+    # Combinar por período
+    all_keys = set(data_imp.keys()) | set(data_exp.keys())
+    gruas_data = {}
+    
+    for key in sorted(all_keys, reverse=True):
+        gruas_data[key] = {
+            "inicio_label": data_imp[key]["inicio_label"] if key in data_imp else data_exp[key]["inicio_label"],
+            "fin_label": data_imp[key]["fin_label"] if key in data_imp else data_exp[key]["fin_label"],
+            "imp": data_imp.get(key),
+            "exp": data_exp.get(key) if periodos_exp else None,
+        }
+    
+    # Período actual (más reciente)
+    periodo_actual = sorted(all_keys, reverse=True)[0] if all_keys else ""
+    
+    return gruas_data, periodo_actual
+
+# ── MAIN ────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     now = datetime.now()
     hoy = now.date()
@@ -242,5 +333,17 @@ if __name__ == "__main__":
     periodos_imp = merge_anos(raw_imp, leer_hoja_import, IDS_IMP, hoy)
     periodos_exp = merge_anos(raw_exp, leer_hoja_export, IDS_EXP, hoy) if raw_exp else {}
 
-    print("IMPORT:", periodos_imp)
-    print("EXPORT:", periodos_exp)
+    # Generar datos para dashboard
+    gruas_data, periodo_actual = generar_dashboard_data(periodos_imp, periodos_exp, hoy)
+    
+    # Guardar JSON
+    with open("docs/data.json", "w", encoding="utf-8") as f:
+        json.dump({
+            "data": gruas_data,
+            "periodo_actual": periodo_actual,
+            "tiene_export": bool(periodos_exp)
+        }, f, ensure_ascii=False, indent=2)
+    
+    print(f"✅ Dashboard data generado: {len(gruas_data)} períodos")
+    print(f"📅 Período actual: {periodo_actual}")
+    print(f"✈️ Tiene export: {bool(periodos_exp)}")
