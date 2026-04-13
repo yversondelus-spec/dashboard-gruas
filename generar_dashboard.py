@@ -135,35 +135,47 @@ def calcular_horas_semanales(rows, grua_ids):
 
     return rows
 
-# ── Helper cortes ──────────────────────────────────────────────────────────
-def get_20th_boundaries(d_start, d_end):
+# ── Helper cortes ──────────────────────────────────────────────────────��───
+def get_cutoff_boundaries(d_start, d_end):
+    """Obtiene los cortes de 21-20 entre dos fechas"""
     boundaries = []
+    
+    # Comenzar desde el primer corte después de d_start
     m, y = d_start.month, d_start.year
-    c = date(y, m, 20)
-
-    if c <= d_start:
+    
+    # Primer corte: día 20 del mes siguiente a d_start
+    if d_start.day <= 20:
+        c = date(y, m, 20)
+    else:
         m = m % 12 + 1
         y = y + (1 if m == 1 else 0)
         c = date(y, m, 20)
-
+    
     while c < d_end:
         boundaries.append(c)
         m = c.month % 12 + 1
         y = c.year + (1 if c.month == 12 else 0)
         c = date(y, m, 20)
-
+    
     return boundaries
 
 def periodo_key_label(fecha):
-    if fecha.day >= 20:
-        inicio = date(fecha.year, fecha.month, 20)
-        fin = date(fecha.year + (fecha.month == 12), (fecha.month % 12) + 1, 20)
+    """Retorna el período 21-20 que contiene la fecha"""
+    if fecha.day > 20:
+        # Día 21+: período va desde 21 de este mes hasta 20 del siguiente
+        inicio = date(fecha.year, fecha.month, 21)
+        fin_m = fecha.month % 12 + 1
+        fin_y = fecha.year + (1 if fecha.month == 12 else 0)
+        fin = date(fin_y, fin_m, 20)
     else:
-        inicio = date(fecha.year - (fecha.month == 1), (fecha.month - 2) % 12 + 1, 20)
+        # Día 1-20: período va desde 21 del mes anterior hasta 20 de este mes
+        inicio_m = fecha.month - 1 if fecha.month > 1 else 12
+        inicio_y = fecha.year if fecha.month > 1 else fecha.year - 1
+        inicio = date(inicio_y, inicio_m, 21)
         fin = date(fecha.year, fecha.month, 20)
-
+    
     key = f"{inicio}_{fin}"
-    label = f"20 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
+    label = f"21 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
     return key, label, inicio, fin
 
 # ── FIX 2: Distribución proporcional ───────────────────────────────────────
@@ -190,13 +202,15 @@ def agrupar_por_periodo(rows, grua_ids, hoy):
             if not hrs or not prev:
                 continue
 
-            bounds = get_20th_boundaries(prev, curr)
+            bounds = get_cutoff_boundaries(prev, curr)
 
             if not bounds:
+                # No hay cortes entre prev y curr, todo va a un período
                 key, label, ini, fin = periodo_key_label(prev)
                 add(key, label, ini, fin, gid, hrs)
 
             else:
+                # Hay cortes, distribuir proporcionalmente
                 total_days = (curr - prev).days
                 tramos = [prev] + bounds + [curr]
 
