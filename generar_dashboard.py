@@ -24,7 +24,7 @@ GRUAS_IMPORT = [
 ]
 IDS_IMP = [g["id"] for g in GRUAS_IMPORT]
 
-# ── FLOTA EXPORT ───────────────────────────────────────────────────────────
+# ── FLOTA EXPORT ──────────────────────────────────────────────────────────
 GRUAS_EXPORT = [
     {"id":"EXP 11720","empresa":"Export Leasing"},
     {"id":"EXP 11721","empresa":"Export Leasing"},
@@ -60,39 +60,62 @@ def _parse_val(val):
 
 # ── Lectura ────────────────────────────────────────────────────────────────
 def leer_hoja_import(excel_bytes, year):
-    df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
-                       header=None, skiprows=5, usecols=range(18))
+    try:
+        df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
+                           header=None, skiprows=5)
+    except ValueError:  # Hoja no existe
+        return []
+    
     rows = []
     for _, row in df.iterrows():
         try:
             fecha_val = pd.to_datetime(row.iloc[1])
-            if pd.isna(fecha_val):  # ← CHECK para NaT
+            if pd.isna(fecha_val):
                 continue
             fecha = fecha_val.date()
         except:
             continue
+        
         entry = {"fecha": fecha}
+        # LINDE comienza en columna I (posición 8)
         for i, g in enumerate(GRUAS_IMPORT):
             entry[g["id"]] = _parse_val(row.iloc[8+i])
         rows.append(entry)
+    
     return rows
 
 def leer_hoja_export(excel_bytes, year):
-    df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
-                       header=None, skiprows=5, usecols=range(14))
+    try:
+        df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
+                           header=None, skiprows=5)
+    except ValueError:  # Hoja no existe
+        return []
+    
     rows = []
+    # Leer headers de la fila 4 (índice 4 después de skiprows=5, así que fila -1)
+    # En realidad necesitamos releer con header=3 para obtener los nombres
+    try:
+        df_header = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
+                                  header=3, skiprows=4, nrows=1)
+        grua_ids_export = [col for col in df_header.columns if col and str(col).strip() and col != "FECHA SEMANA"]
+    except:
+        grua_ids_export = IDS_EXP
+    
     for _, row in df.iterrows():
         try:
             fecha_val = pd.to_datetime(row.iloc[1])
-            if pd.isna(fecha_val):  # ← CHECK para NaT
+            if pd.isna(fecha_val):
                 continue
             fecha = fecha_val.date()
         except:
             continue
+        
         entry = {"fecha": fecha}
-        for i, g in enumerate(GRUAS_EXPORT):
-            entry[g["id"]] = _parse_val(row.iloc[2+i])
+        # Leer desde columna C en adelante
+        for i, gid in enumerate(grua_ids_export):
+            entry[gid] = _parse_val(row.iloc[2+i])
         rows.append(entry)
+    
     return rows
 
 # ── FIX 1: Diferenciales con fecha previa ──────────────────────────────────
@@ -203,7 +226,7 @@ def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
         if rows:
             all_rows.extend(rows)
 
-    # ← FILTER para evitar NaT en el sort
+    # FILTER para evitar NaT en el sort
     all_rows = [r for r in all_rows if isinstance(r["fecha"], date)]
     all_rows.sort(key=lambda x: x["fecha"])
 
