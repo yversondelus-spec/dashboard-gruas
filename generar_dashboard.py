@@ -69,7 +69,7 @@ def leer_hoja_import(excel_bytes, year):
     rows = []
     for _, row in df.iterrows():
         try:
-            fecha_val = pd.to_datetime(row.iloc[1])
+            fecha_val = pd.to_datetime(row.iloc[1], dayfirst=True)
             if pd.isna(fecha_val):
                 continue
             fecha = fecha_val.date()
@@ -79,7 +79,10 @@ def leer_hoja_import(excel_bytes, year):
         entry = {"fecha": fecha}
         # LINDE comienza en columna I (posición 8)
         for i, g in enumerate(GRUAS_IMPORT):
-            entry[g["id"]] = _parse_val(row.iloc[8+i])
+            try:
+                entry[g["id"]] = _parse_val(row.iloc[8+i])
+            except IndexError:
+                entry[g["id"]] = None
         rows.append(entry)
     
     return rows
@@ -92,18 +95,9 @@ def leer_hoja_export(excel_bytes, year):
         return []
     
     rows = []
-    # Leer headers de la fila 4 (índice 4 después de skiprows=5, así que fila -1)
-    # En realidad necesitamos releer con header=3 para obtener los nombres
-    try:
-        df_header = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
-                                  header=3, skiprows=4, nrows=1)
-        grua_ids_export = [col for col in df_header.columns if col and str(col).strip() and col != "FECHA SEMANA"]
-    except:
-        grua_ids_export = IDS_EXP
-    
     for _, row in df.iterrows():
         try:
-            fecha_val = pd.to_datetime(row.iloc[1])
+            fecha_val = pd.to_datetime(row.iloc[1], dayfirst=True)
             if pd.isna(fecha_val):
                 continue
             fecha = fecha_val.date()
@@ -111,9 +105,12 @@ def leer_hoja_export(excel_bytes, year):
             continue
         
         entry = {"fecha": fecha}
-        # Leer desde columna C en adelante
-        for i, gid in enumerate(grua_ids_export):
-            entry[gid] = _parse_val(row.iloc[2+i])
+        # Leer desde columna C en adelante (posición 2)
+        for i, gid in enumerate(IDS_EXP):
+            try:
+                entry[gid] = _parse_val(row.iloc[2+i])
+            except IndexError:
+                entry[gid] = None
         rows.append(entry)
     
     return rows
