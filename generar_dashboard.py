@@ -211,7 +211,7 @@ def agrupar_por_periodo(rows, grua_ids, hoy):
 
     return periodos
 
-# ── FIX 3: Merge sin reset ──────────────────────────────────────��──────────
+# ── FIX 3: Merge sin reset ─────────────────────────────────────────────────
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
     all_rows = []
 
@@ -335,6 +335,9 @@ if __name__ == "__main__":
 
     # Generar datos para dashboard
     gruas_data, periodo_actual = generar_dashboard_data(periodos_imp, periodos_exp, hoy)
+    
+    # Crear directorio si no existe
+    os.makedirs("docs", exist_ok=True)
     
     # Guardar JSON
     with open("docs/data.json", "w", encoding="utf-8") as f:
