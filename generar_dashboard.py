@@ -65,7 +65,10 @@ def leer_hoja_import(excel_bytes, year):
     rows = []
     for _, row in df.iterrows():
         try:
-            fecha = pd.to_datetime(row.iloc[1]).date()
+            fecha_val = pd.to_datetime(row.iloc[1])
+            if pd.isna(fecha_val):  # ← CHECK para NaT
+                continue
+            fecha = fecha_val.date()
         except:
             continue
         entry = {"fecha": fecha}
@@ -80,7 +83,10 @@ def leer_hoja_export(excel_bytes, year):
     rows = []
     for _, row in df.iterrows():
         try:
-            fecha = pd.to_datetime(row.iloc[1]).date()
+            fecha_val = pd.to_datetime(row.iloc[1])
+            if pd.isna(fecha_val):  # ← CHECK para NaT
+                continue
+            fecha = fecha_val.date()
         except:
             continue
         entry = {"fecha": fecha}
@@ -197,6 +203,8 @@ def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
         if rows:
             all_rows.extend(rows)
 
+    # ← FILTER para evitar NaT en el sort
+    all_rows = [r for r in all_rows if isinstance(r["fecha"], date)]
     all_rows.sort(key=lambda x: x["fecha"])
 
     all_rows = calcular_horas_semanales(all_rows, grua_ids)
