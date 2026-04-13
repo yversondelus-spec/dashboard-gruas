@@ -22,10 +22,10 @@ jobs:
           SHEET_URL_IMPORT: ${{ secrets.SHEET_URL_IMPORT }}
           SHEET_URL_EXPORT: ${{ secrets.SHEET_URL_EXPORT }}
         run: python generar_dashboard.py
-      - name: Commit y push index.html
+      - name: Commit y push archivos
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.html docs/data.json
           git diff --staged --quiet || git commit -m "Dashboard actualizado"
           git push
