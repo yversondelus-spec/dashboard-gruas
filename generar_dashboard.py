@@ -41,7 +41,7 @@ GRUAS_EXPORT = [
 ]
 IDS_EXP = [g["id"] for g in GRUAS_EXPORT]
 
-# ── Utils ──────────────────────────────────────────────────────────────────
+# ── Utils ────────────────────────────────────���─────────────────────────────
 def download_excel(url):
     if not url:
         return None
@@ -135,7 +135,7 @@ def calcular_horas_semanales(rows, grua_ids):
 
     return rows
 
-# ── Helper cortes ──────────────────────────────────────────────────────��───
+# ── Helper cortes ──────────────────────────────────────────────────────────
 def get_cutoff_boundaries(d_start, d_end):
     """Obtiene los cortes de 21-20 entre dos fechas"""
     boundaries = []
@@ -347,6 +347,16 @@ if __name__ == "__main__":
     periodos_imp = merge_anos(raw_imp, leer_hoja_import, IDS_IMP, hoy)
     periodos_exp = merge_anos(raw_exp, leer_hoja_export, IDS_EXP, hoy) if raw_exp else {}
 
+    # 🔍 DEBUG: Mostrar período específico
+    target_period = "2026-02-21_2026-03-20"
+    if target_period in periodos_imp:
+        print(f"\n🔍 PERÍODO: {target_period}")
+        print(f"   LINDE 11728 = {periodos_imp[target_period]['hrsporgid'].get('LINDE 11728', 0):.1f} hrs")
+        print(f"   Todos los datos: {periodos_imp[target_period]['hrsporgid']}")
+    else:
+        print(f"\n❌ Período {target_period} NO ENCONTRADO")
+        print(f"Períodos disponibles: {list(periodos_imp.keys())}")
+
     # Generar datos para dashboard
     gruas_data, periodo_actual = generar_dashboard_data(periodos_imp, periodos_exp, hoy)
     
@@ -361,6 +371,6 @@ if __name__ == "__main__":
             "tiene_export": bool(periodos_exp)
         }, f, ensure_ascii=False, indent=2)
     
-    print(f"✅ Dashboard data generado: {len(gruas_data)} períodos")
+    print(f"\n✅ Dashboard data generado: {len(gruas_data)} períodos")
     print(f"📅 Período actual: {periodo_actual}")
     print(f"✈️ Tiene export: {bool(periodos_exp)}")
