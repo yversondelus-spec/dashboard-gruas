@@ -53,52 +53,43 @@ def download_excel(url):
     return BytesIO(r.content)
 
 def _parse_val(val):
-    if pd.isna(val): return None
-    try: return float(val)
-    except: return None
+    try:
+        return float(val)
+    except:
+        return None
 
 # ── Lectura ────────────────────────────────────────────────────────────────
 def leer_hoja_import(excel_bytes, year):
-    try:
-        df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
-                           header=None, skiprows=5, usecols=range(18))
-    except: return []
-
+    df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
+                       header=None, skiprows=5, usecols=range(18))
     rows = []
     for _, row in df.iterrows():
         try:
             fecha = pd.to_datetime(row.iloc[1]).date()
-            sem   = int(row.iloc[0])
         except:
             continue
-
-        entry = {"sem": sem, "fecha": fecha}
+        entry = {"fecha": fecha}
         for i, g in enumerate(GRUAS_IMPORT):
-            entry[g["id"]] = _parse_val(row.iloc[8 + i])
+            entry[g["id"]] = _parse_val(row.iloc[8+i])
         rows.append(entry)
     return rows
 
 def leer_hoja_export(excel_bytes, year):
-    try:
-        df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
-                           header=None, skiprows=5, usecols=range(14))
-    except: return []
-
+    df = pd.read_excel(excel_bytes, sheet_name=f"SEMANAS {year}",
+                       header=None, skiprows=5, usecols=range(14))
     rows = []
     for _, row in df.iterrows():
         try:
             fecha = pd.to_datetime(row.iloc[1]).date()
-            sem   = int(row.iloc[0])
         except:
             continue
-
-        entry = {"sem": sem, "fecha": fecha}
+        entry = {"fecha": fecha}
         for i, g in enumerate(GRUAS_EXPORT):
-            entry[g["id"]] = _parse_val(row.iloc[2 + i])
+            entry[g["id"]] = _parse_val(row.iloc[2+i])
         rows.append(entry)
     return rows
 
-# ── FIX 1: diferencial con fecha previa ────────────────────────────────────
+# ── FIX 1: Diferenciales con fecha previa ──────────────────────────────────
 def calcular_horas_semanales(rows, grua_ids):
     prev_val  = {gid: None for gid in grua_ids}
     prev_date = {gid: None for gid in grua_ids}
@@ -108,19 +99,19 @@ def calcular_horas_semanales(rows, grua_ids):
             val = row.get(gid)
 
             if isinstance(val, float) and prev_val[gid] is not None:
-                row[f"{gid}_hrs"]       = round(max(val - prev_val[gid], 0), 1)
+                row[f"{gid}_hrs"] = max(val - prev_val[gid], 0)
                 row[f"{gid}_prev_date"] = prev_date[gid]
             else:
-                row[f"{gid}_hrs"]       = None
+                row[f"{gid}_hrs"] = None
                 row[f"{gid}_prev_date"] = None
 
             if isinstance(val, float):
-                prev_val[gid]  = val
+                prev_val[gid] = val
                 prev_date[gid] = row["fecha"]
 
     return rows
 
-# ── Helper corte 20 ────────────────────────────────────────────────────────
+# ── Helper cortes ──────────────────────────────────────────────────────────
 def get_20th_boundaries(d_start, d_end):
     boundaries = []
     m, y = d_start.month, d_start.year
@@ -128,7 +119,7 @@ def get_20th_boundaries(d_start, d_end):
 
     if c <= d_start:
         m = m % 12 + 1
-        y = y + (1 if d_start.month == 12 else 0)
+        y = y + (1 if m == 1 else 0)
         c = date(y, m, 20)
 
     while c < d_end:
@@ -139,7 +130,6 @@ def get_20th_boundaries(d_start, d_end):
 
     return boundaries
 
-# ── Periodo ────────────────────────────────────────────────────────────────
 def periodo_key_label(fecha):
     if fecha.day >= 20:
         inicio = date(fecha.year, fecha.month, 20)
@@ -148,78 +138,81 @@ def periodo_key_label(fecha):
         inicio = date(fecha.year - (fecha.month == 1), (fecha.month - 2) % 12 + 1, 20)
         fin = date(fecha.year, fecha.month, 20)
 
-    key   = f"{inicio.strftime('%Y%m%d')}_{fin.strftime('%Y%m%d')}"
+    key = f"{inicio}_{fin}"
     label = f"20 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
     return key, label, inicio, fin
 
-# ── FIX 2: distribución correcta ───────────────────────────────────────────
+# ── FIX 2: Distribución proporcional ───────────────────────────────────────
 def agrupar_por_periodo(rows, grua_ids, hoy):
     periodos = {}
 
     def add(key, label, inicio, fin, gid, hrs):
         if key not in periodos:
             periodos[key] = {
-                "key": key, "label": label,
-                "inicio": inicio, "fin": fin,
-                "hrsporgid": {g:0 for g in grua_ids},
-                "tiene_dato": {g:False for g in grua_ids},
-                "semanas":[]
+                "label": label,
+                "inicio": inicio,
+                "fin": fin,
+                "hrsporgid": {g:0 for g in grua_ids}
             }
         periodos[key]["hrsporgid"][gid] += hrs
-        periodos[key]["tiene_dato"][gid] = True
 
     for row in rows:
+        curr = row["fecha"]
+
         for gid in grua_ids:
             hrs = row.get(f"{gid}_hrs")
             prev = row.get(f"{gid}_prev_date")
-            curr = row["fecha"]
 
             if not hrs or not prev:
                 continue
 
-            boundaries = get_20th_boundaries(prev, curr)
+            bounds = get_20th_boundaries(prev, curr)
 
-            if not boundaries:
-                k,l,i,f = periodo_key_label(prev)
-                add(k,l,i,f,gid,hrs)
+            if not bounds:
+                key, label, ini, fin = periodo_key_label(prev)
+                add(key, label, ini, fin, gid, hrs)
+
             else:
-                total = (curr - prev).days
-                pts = [prev] + boundaries + [curr]
+                total_days = (curr - prev).days
+                tramos = [prev] + bounds + [curr]
 
-                for i in range(len(pts)-1):
-                    d1, d2 = pts[i], pts[i+1]
-                    dias = (d2 - d1).days
-                    if dias == 0: continue
+                for i in range(len(tramos)-1):
+                    d1, d2 = tramos[i], tramos[i+1]
+                    days = (d2 - d1).days
+                    if days == 0: continue
 
-                    seg_hrs = hrs * dias / total
-                    k,l,i,f = periodo_key_label(d1)
-                    add(k,l,i,f,gid,seg_hrs)
+                    h = hrs * days / total_days
+                    key, label, ini, fin = periodo_key_label(d1)
+                    add(key, label, ini, fin, gid, h)
 
     return periodos
 
-# ── FIX 3: merge sin reset ────────────────────────────────────────────────
+# ── FIX 3: Merge sin reset ─────────────────────────────────────────────────
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
     all_rows = []
 
     for y in [2024, 2025, 2026]:
         excel_bytes.seek(0)
-        all_rows += leer_fn(excel_bytes, y)
+        rows = leer_fn(excel_bytes, y)
+        if rows:
+            all_rows.extend(rows)
 
     all_rows.sort(key=lambda x: x["fecha"])
+
     all_rows = calcular_horas_semanales(all_rows, grua_ids)
 
     return agrupar_por_periodo(all_rows, grua_ids, hoy)
 
 # ── MAIN ───────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-
     now = datetime.now()
     hoy = now.date()
 
-    imp = download_excel(SHEET_URL_IMP)
-    exp = download_excel(SHEET_URL_EXP)
+    raw_imp = download_excel(SHEET_URL_IMP)
+    raw_exp = download_excel(SHEET_URL_EXP) if SHEET_URL_EXP else None
 
-    data_imp = merge_anos(imp, leer_hoja_import, IDS_IMP, hoy)
-    data_exp = merge_anos(exp, leer_hoja_export, IDS_EXP, hoy) if exp else {}
+    periodos_imp = merge_anos(raw_imp, leer_hoja_import, IDS_IMP, hoy)
+    periodos_exp = merge_anos(raw_exp, leer_hoja_export, IDS_EXP, hoy) if raw_exp else {}
 
-    print("OK calculado correctamente")
+    print("IMPORT:", periodos_imp)
+    print("EXPORT:", periodos_exp)
