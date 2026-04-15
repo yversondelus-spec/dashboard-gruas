@@ -2,8 +2,8 @@ import os, sys, json, requests, pandas as pd
 from datetime import datetime, date
 from io import BytesIO
 
-# ── Configuración ──────────────────────────────────────────────────────────
-LIMIT_HRS     = 160
+# ── Configuración ────────────────────────────────────────────────────────────
+LIMIT_HRS     = 120   # ✅ FIX 3: era 160, ahora 120
 SHEET_URL_IMP = os.environ.get("SHEET_URL_IMPORT", "")
 SHEET_URL_EXP = os.environ.get("SHEET_URL_EXPORT", "")
 
@@ -24,7 +24,7 @@ GRUAS_IMPORT = [
 ]
 IDS_IMP = [g["id"] for g in GRUAS_IMPORT]
 
-# ── FLOTA EXPORT ───────────────────────────────────────────────────────────
+# ── FLOTA EXPORT ──────────────────────────────────────────────────────────────
 GRUAS_EXPORT = [
     {"id":"EXP 11720","empresa":"Export Leasing"},
     {"id":"EXP 11721","empresa":"Export Leasing"},
@@ -65,10 +65,15 @@ def download_excel(url, label=""):
     return BytesIO(r.content)
 
 def _parse_val(val):
+    # ✅ FIX 1: si el valor es texto no numérico (ej: 'MANTENCIÓN'), retorna None en vez de crashear
     if pd.isna(val): return None
     if isinstance(val, str):
         v = val.strip()
-        return float(v) if v else None
+        if not v: return None
+        try:
+            return float(v)
+        except ValueError:
+            return None   # texto no numérico → lo ignoramos, vale 0 en los cálculos
     try: return float(val)
     except: return None
 
@@ -128,23 +133,27 @@ def calcular_horas_semanales(rows, grua_ids):
     return rows
 
 def periodo_key_label(fecha):
-    if fecha.day >= 20:
-        inicio = date(fecha.year, fecha.month, 20)
+    # ✅ FIX 2: período va de día 21 del mes anterior → día 20 del mes actual
+    if fecha.day >= 21:
+        inicio = date(fecha.year, fecha.month, 21)
         fin = date(fecha.year + 1, 1, 20) if fecha.month == 12 else date(fecha.year, fecha.month + 1, 20)
     else:
-        inicio = date(fecha.year - 1, 12, 20) if fecha.month == 1 else date(fecha.year, fecha.month - 1, 20)
+        if fecha.month == 1:
+            inicio = date(fecha.year - 1, 12, 21)
+        else:
+            inicio = date(fecha.year, fecha.month - 1, 21)
         fin = date(fecha.year, fecha.month, 20)
     key   = f"{inicio.strftime('%Y%m%d')}_{fin.strftime('%Y%m%d')}"
-    label = f"20 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
+    label = f"21 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
     return key, label, inicio, fin
 
 def agrupar_por_periodo(rows, grua_ids, hoy):
     periodos = {}
     for row in rows:
         fecha = row["fecha"]
-        if fecha > hoy: continue                       # ignorar fechas futuras
+        if fecha > hoy: continue
         key, label, inicio, fin = periodo_key_label(fecha)
-        if inicio > hoy: continue                      # ignorar períodos futuros
+        if inicio > hoy: continue
         if key not in periodos:
             periodos[key] = {
                 "key": key, "label": label,
@@ -162,24 +171,24 @@ def agrupar_por_periodo(rows, grua_ids, hoy):
     return periodos
 
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
-    total = {}
+    # ✅ FIX 4: deduplicar filas por fecha antes de calcular horas
+    # Esto evita que una misma semana se sume dos veces si aparece en hoja 2024 y 2025
+    all_rows = []
+    seen_fechas = set()
     for year in [2024, 2025, 2026]:
         excel_bytes.seek(0)
         rows = leer_fn(excel_bytes, year)
         if not rows: continue
-        rows = calcular_horas_semanales(rows, grua_ids)
-        for k, v in agrupar_por_periodo(rows, grua_ids, hoy).items():
-            if k not in total:
-                total[k] = v
-            else:
-                for gid in grua_ids:
-                    if v["tiene_dato"][gid]:
-                        total[k]["hrsporgid"][gid] += v["hrsporgid"][gid]
-                        total[k]["tiene_dato"][gid] = True
-                for s in v["semanas"]:
-                    if s not in total[k]["semanas"]:
-                        total[k]["semanas"].append(s)
-    return total
+        for row in rows:
+            if row["fecha"] not in seen_fechas:
+                all_rows.append(row)
+                seen_fechas.add(row["fecha"])
+    if not all_rows:
+        return {}
+    # Ordenar por fecha para que el diferencial sea correcto
+    all_rows.sort(key=lambda r: r["fecha"])
+    all_rows = calcular_horas_semanales(all_rows, grua_ids)
+    return agrupar_por_periodo(all_rows, grua_ids, hoy)
 
 def get_status(hrs, tiene_dato):
     if not tiene_dato: return {"key":"sin_dato","label":"Sin dato","cls":"no-data"}
@@ -240,7 +249,7 @@ def build_entry(p, gruas, colors):
         "n_sem":      len(p["semanas"]),
     }
 
-# ── Main ───────────────────────────────────────────────────────────────────
+# ── Main ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     if not SHEET_URL_IMP:
         print("ERROR: Variable SHEET_URL_IMPORT no configurada."); sys.exit(1)
@@ -268,8 +277,8 @@ if __name__ == "__main__":
             continue
         base = p_imp or p_exp
         gruas_js[key] = {
-            "label":       base["label"],
-            "inicio_label": f"20 {MESES_ES[base['inicio'].month]} {base['inicio'].year}",
+            "label":        base["label"],
+            "inicio_label": f"21 {MESES_ES[base['inicio'].month]} {base['inicio'].year}",
             "fin_label":    f"20 {MESES_ES[base['fin'].month]} {base['fin'].year}",
             "imp": build_entry(p_imp, GRUAS_IMPORT, COLORS_IMP) if has_imp else None,
             "exp": build_entry(p_exp, GRUAS_EXPORT, COLORS_EXP) if has_exp else None,
@@ -282,8 +291,6 @@ if __name__ == "__main__":
 
     periodo_opts = ""
     for key in keys_sorted:
-        sel   = "selected" if key == actual_key else ""
-        gruas_js[key]["label"]
         periodo_opts += f'<option value="{key}" {"selected" if key == actual_key else ""}>{gruas_js[key]["label"]}</option>'
 
     print(f"Períodos procesados: {len(gruas_js)}")
