@@ -3,14 +3,14 @@ from datetime import datetime, date
 from io import BytesIO
 
 # ── Configuración ────────────────────────────────────────────────────────────
-LIMIT_HRS     = 120   # ✅ FIX 3: era 160, ahora 120
+LIMIT_HRS     = 120
 SHEET_URL_IMP = os.environ.get("SHEET_URL_IMPORT", "")
 SHEET_URL_EXP = os.environ.get("SHEET_URL_EXPORT", "")
 
 MESES_ES = {1:"Ene",2:"Feb",3:"Mar",4:"Abr",5:"May",6:"Jun",
             7:"Jul",8:"Ago",9:"Sep",10:"Oct",11:"Nov",12:"Dic"}
 
-# ── FLOTA IMPORT: solo Linde (todas BAJA) — Royal en Excel pero no se renderiza
+# ── FLOTA IMPORT: solo Linde ──────────────────────────────────────────────────
 GRUAS_IMPORT = [
     {"id":"LINDE 11728","empresa":"Linde Leasing"},
     {"id":"LINDE 11731","empresa":"Linde Leasing"},
@@ -53,6 +53,7 @@ COLORS_EXP = {
     "EXP 11730":"#1B3A6B","EXP 11737":"#2A4A7A","EXP 11740":"#3A5A8A",
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
 def download_excel(url, label=""):
     if not url:
         return None
@@ -65,17 +66,25 @@ def download_excel(url, label=""):
     return BytesIO(r.content)
 
 def _parse_val(val):
-    # ✅ FIX 1: si el valor es texto no numérico (ej: 'MANTENCIÓN'), retorna None en vez de crashear
-    if pd.isna(val): return None
+    """
+    Convierte el valor de la celda a float.
+    Si es texto no numérico (ej: 'MANTENCIÓN', 'PANA', '') retorna None.
+    None significa "sin dato" y NO se usa para calcular diferenciales.
+    """
+    if pd.isna(val):
+        return None
     if isinstance(val, str):
         v = val.strip()
-        if not v: return None
+        if not v:
+            return None
         try:
             return float(v)
         except ValueError:
-            return None   # texto no numérico → lo ignoramos, vale 0 en los cálculos
-    try: return float(val)
-    except: return None
+            return None   # texto descriptivo → ignorar
+    try:
+        return float(val)
+    except:
+        return None
 
 def leer_hoja_import(excel_bytes, year):
     """col0=Nº, col1=Fecha, cols2-7=Royal(skip), cols8-16=Linde(9 grúas)"""
@@ -84,14 +93,19 @@ def leer_hoja_import(excel_bytes, year):
         df = pd.read_excel(excel_bytes, sheet_name=nombre, header=None,
                            skiprows=5, usecols=range(18))
     except Exception as e:
-        print(f"  [WARN] '{nombre}' Import: {e}"); return []
+        print(f"  [WARN] '{nombre}' Import: {e}")
+        return []
     rows = []
     for _, row in df.iterrows():
         sem = row.iloc[0]
-        if pd.isna(sem) or not str(sem).strip().isdigit(): continue
-        if int(sem) > 57: continue
-        try: fecha = pd.to_datetime(row.iloc[1]).date()
-        except: continue
+        if pd.isna(sem) or not str(sem).strip().isdigit():
+            continue
+        if int(sem) > 57:
+            continue
+        try:
+            fecha = pd.to_datetime(row.iloc[1]).date()
+        except:
+            continue
         entry = {"sem": int(sem), "fecha": fecha}
         for i, g in enumerate(GRUAS_IMPORT):
             entry[g["id"]] = _parse_val(row.iloc[8 + i])
@@ -105,55 +119,107 @@ def leer_hoja_export(excel_bytes, year):
         df = pd.read_excel(excel_bytes, sheet_name=nombre, header=None,
                            skiprows=5, usecols=range(14))
     except Exception as e:
-        print(f"  [WARN] '{nombre}' Export: {e}"); return []
+        print(f"  [WARN] '{nombre}' Export: {e}")
+        return []
     rows = []
     for _, row in df.iterrows():
         sem = row.iloc[0]
-        if pd.isna(sem) or not str(sem).strip().isdigit(): continue
-        if int(sem) > 57: continue
-        try: fecha = pd.to_datetime(row.iloc[1]).date()
-        except: continue
+        if pd.isna(sem) or not str(sem).strip().isdigit():
+            continue
+        if int(sem) > 57:
+            continue
+        try:
+            fecha = pd.to_datetime(row.iloc[1]).date()
+        except:
+            continue
         entry = {"sem": int(sem), "fecha": fecha}
         for i, g in enumerate(GRUAS_EXPORT):
             entry[g["id"]] = _parse_val(row.iloc[2 + i])
         rows.append(entry)
     return rows
 
+# ── FIX 1: calcular diferencial SOLO dentro del mismo período ─────────────────
 def calcular_horas_semanales(rows, grua_ids):
-    prev = {gid: None for gid in grua_ids}
+    """
+    Calcula las horas trabajadas en cada semana como:
+        hrs = lectura_actual - lectura_anterior
+
+    REGLA CRÍTICA: solo se calcula el diferencial si ambas lecturas
+    pertenecen al MISMO período de corte (20 → 20).
+    Si la lectura anterior es de un período distinto, se descarta
+    para evitar que horas de meses anteriores contaminen el período actual.
+
+    Además, si el valor es None (mantención, pana, celda vacía) se omite
+    la semana pero se mantiene el último valor numérico válido como referencia
+    para el siguiente cálculo DENTRO del mismo período.
+    """
+    prev_val   = {gid: None for gid in grua_ids}
+    prev_fecha = {gid: None for gid in grua_ids}
+
     for row in rows:
+        fecha_actual = row["fecha"]
+        curr_key, _, _, _ = periodo_key_label(fecha_actual)
+
         for gid in grua_ids:
             val = row.get(gid)
-            if isinstance(val, float) and prev[gid] is not None:
-                row[f"{gid}_hrs"] = round(max(val - prev[gid], 0), 1)
+            pv  = prev_val[gid]
+            pf  = prev_fecha[gid]
+
+            if isinstance(val, float) and pv is not None and pf is not None:
+                prev_key, _, _, _ = periodo_key_label(pf)
+                if curr_key == prev_key:
+                    # ✅ Misma período → diferencial válido
+                    row[f"{gid}_hrs"] = round(max(val - pv, 0), 1)
+                else:
+                    # ❌ Período distinto → NO contaminar con horas anteriores
+                    # La grúa arranca "de cero" en este período:
+                    # no tenemos referencia del inicio del período, así que sin dato.
+                    row[f"{gid}_hrs"] = None
             else:
                 row[f"{gid}_hrs"] = None
+
+            # Actualizar referencia solo si hay valor numérico
             if isinstance(val, float):
-                prev[gid] = val
+                prev_val[gid]   = val
+                prev_fecha[gid] = fecha_actual
+
     return rows
 
+# ── FIX 2: período 20→20 correcto ────────────────────────────────────────────
 def periodo_key_label(fecha):
-    # ✅ FIX 2: período va de día 21 del mes anterior → día 20 del mes actual
-    if fecha.day >= 21:
-        inicio = date(fecha.year, fecha.month, 21)
-        fin = date(fecha.year + 1, 1, 20) if fecha.month == 12 else date(fecha.year, fecha.month + 1, 20)
-    else:
-        if fecha.month == 1:
-            inicio = date(fecha.year - 1, 12, 21)
+    """
+    El corte contractual va del día 20 de un mes al día 20 del siguiente.
+    - días 1-20  → pertenecen al período que cierra el día 20 de ese mes
+    - días 21-31 → pertenecen al período que cierra el día 20 del mes siguiente
+    """
+    if fecha.day > 20:
+        # Segunda quincena: el período cierra el 20 del mes siguiente
+        inicio = date(fecha.year, fecha.month, 20)
+        if fecha.month == 12:
+            fin = date(fecha.year + 1, 1, 20)
         else:
-            inicio = date(fecha.year, fecha.month - 1, 21)
+            fin = date(fecha.year, fecha.month + 1, 20)
+    else:
+        # Primera quincena o día 20: el período cierra el 20 de este mes
+        if fecha.month == 1:
+            inicio = date(fecha.year - 1, 12, 20)
+        else:
+            inicio = date(fecha.year, fecha.month - 1, 20)
         fin = date(fecha.year, fecha.month, 20)
+
     key   = f"{inicio.strftime('%Y%m%d')}_{fin.strftime('%Y%m%d')}"
-    label = f"21 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
+    label = f"20 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
     return key, label, inicio, fin
 
 def agrupar_por_periodo(rows, grua_ids, hoy):
     periodos = {}
     for row in rows:
         fecha = row["fecha"]
-        if fecha > hoy: continue
+        if fecha > hoy:
+            continue
         key, label, inicio, fin = periodo_key_label(fecha)
-        if inicio > hoy: continue
+        if inicio > hoy:
+            continue
         if key not in periodos:
             periodos[key] = {
                 "key": key, "label": label,
@@ -171,32 +237,41 @@ def agrupar_por_periodo(rows, grua_ids, hoy):
     return periodos
 
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
-    # ✅ FIX 4: deduplicar filas por fecha antes de calcular horas
-    # Esto evita que una misma semana se sume dos veces si aparece en hoja 2024 y 2025
-    all_rows = []
+    """
+    Lee las hojas de múltiples años, deduplica por fecha y calcula horas.
+    El orden de procesamiento (cronológico) es importante para el diferencial.
+    """
+    all_rows    = []
     seen_fechas = set()
     for year in [2024, 2025, 2026]:
         excel_bytes.seek(0)
         rows = leer_fn(excel_bytes, year)
-        if not rows: continue
+        if not rows:
+            continue
         for row in rows:
             if row["fecha"] not in seen_fechas:
                 all_rows.append(row)
                 seen_fechas.add(row["fecha"])
+
     if not all_rows:
         return {}
-    # Ordenar por fecha para que el diferencial sea correcto
+
+    # Ordenar cronológicamente para que el diferencial sea correcto
     all_rows.sort(key=lambda r: r["fecha"])
     all_rows = calcular_horas_semanales(all_rows, grua_ids)
     return agrupar_por_periodo(all_rows, grua_ids, hoy)
 
 def get_status(hrs, tiene_dato):
-    if not tiene_dato: return {"key":"sin_dato","label":"Sin dato","cls":"no-data"}
+    if not tiene_dato:
+        return {"key":"sin_dato","label":"Sin dato","cls":"no-data"}
     pct = hrs / LIMIT_HRS
-    if hrs >= LIMIT_HRS: return {"key":"limit","label":"Límite Superado","cls":"limit"}
-    if pct >= 0.86:      return {"key":"alert","label":"Alerta","cls":"alert"}
-    if pct >= 0.60:      return {"key":"precaution","label":"Precaución","cls":"precaution"}
-    return                      {"key":"ok","label":"OK","cls":"ok"}
+    if hrs >= LIMIT_HRS:
+        return {"key":"limit","label":"Límite Superado","cls":"limit"}
+    if pct >= 0.86:
+        return {"key":"alert","label":"Alerta","cls":"alert"}
+    if pct >= 0.60:
+        return {"key":"precaution","label":"Precaución","cls":"precaution"}
+    return         {"key":"ok","label":"OK","cls":"ok"}
 
 def build_card(gid, empresa, hrs, tiene_dato, idx):
     st    = get_status(hrs, tiene_dato)
@@ -247,12 +322,14 @@ def build_entry(p, gruas, colors):
         "bar_colors": bar_colors,
         "donut":      [ok, prec, alert, limit],
         "n_sem":      len(p["semanas"]),
+        "semanas":    p["semanas"],
     }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     if not SHEET_URL_IMP:
-        print("ERROR: Variable SHEET_URL_IMPORT no configurada."); sys.exit(1)
+        print("ERROR: Variable SHEET_URL_IMPORT no configurada.")
+        sys.exit(1)
 
     now = datetime.now()
     hoy = now.date()
@@ -265,7 +342,8 @@ if __name__ == "__main__":
 
     all_keys = set(list(periodos_imp.keys()) + list(periodos_exp.keys()))
     if not all_keys:
-        print("ERROR: No se encontraron datos."); sys.exit(1)
+        print("ERROR: No se encontraron datos.")
+        sys.exit(1)
 
     gruas_js = {}
     for key in all_keys:
@@ -278,7 +356,7 @@ if __name__ == "__main__":
         base = p_imp or p_exp
         gruas_js[key] = {
             "label":        base["label"],
-            "inicio_label": f"21 {MESES_ES[base['inicio'].month]} {base['inicio'].year}",
+            "inicio_label": f"20 {MESES_ES[base['inicio'].month]} {base['inicio'].year}",
             "fin_label":    f"20 {MESES_ES[base['fin'].month]} {base['fin'].year}",
             "imp": build_entry(p_imp, GRUAS_IMPORT, COLORS_IMP) if has_imp else None,
             "exp": build_entry(p_exp, GRUAS_EXPORT, COLORS_EXP) if has_exp else None,
@@ -291,7 +369,8 @@ if __name__ == "__main__":
 
     periodo_opts = ""
     for key in keys_sorted:
-        periodo_opts += f'<option value="{key}" {"selected" if key == actual_key else ""}>{gruas_js[key]["label"]}</option>'
+        sel = "selected" if key == actual_key else ""
+        periodo_opts += f'<option value="{key}" {sel}>{gruas_js[key]["label"]}</option>'
 
     print(f"Períodos procesados: {len(gruas_js)}")
     print(f"Mostrando: {gruas_js[actual_key]['label']}")
@@ -305,7 +384,8 @@ if __name__ == "__main__":
         .replace("{{PERIODO_OPTIONS}}", periodo_opts) \
         .replace("{{GRUAS_JS_DATA}}",   json.dumps(gruas_js, ensure_ascii=False)) \
         .replace("{{PERIODO_ACTUAL}}",  actual_key) \
-        .replace("{{TIENE_EXPORT}}",    "true" if raw_exp else "false")
+        .replace("{{TIENE_EXPORT}}",    "true" if raw_exp else "false") \
+        .replace("{{LIMIT_HRS}}",       str(LIMIT_HRS))
 
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
