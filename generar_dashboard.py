@@ -141,25 +141,20 @@ def leer_hoja_export(excel_bytes, year):
 # ── FIX: cálculo correcto de horas por período 20→20 ──────────────────────────
 
 def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
-    """
-    horas_período =
-        última lectura dentro del período
-        - última lectura en o antes del inicio
-    """
 
     historial = {gid: [] for gid in grua_ids}
 
-    # Construir historial cronológico
+    # Historial completo
     for row in all_rows_sorted:
 
         for gid in grua_ids:
 
             v = row.get(gid)
 
-            if v is not None:
-                historial[gid].append((row["fecha"], v))
+            if isinstance(v, (int, float)):
+                historial[gid].append((row["fecha"], float(v)))
 
-    # Calcular horas para cada período
+    # Calcular períodos
     for key, p in periodos.items():
 
         inicio = p["inicio"]
@@ -169,7 +164,7 @@ def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
 
             hist = historial[gid]
 
-            # Última lectura ANTES o EN inicio
+            # referencia inicial
             ref_val = None
 
             for fecha, val in hist:
@@ -177,18 +172,20 @@ def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
                 if fecha <= inicio:
                     ref_val = val
 
-            # Última lectura DENTRO del período
-            last_val = None
+            # máximo valor dentro del período
+            max_val = None
 
             for fecha, val in hist:
 
                 if inicio < fecha <= fin:
-                    last_val = val
 
-            # Cálculo final
-            if ref_val is not None and last_val is not None:
+                    if max_val is None or val > max_val:
+                        max_val = val
 
-                hrs = round(max(last_val - ref_val, 0), 1)
+            # cálculo final
+            if ref_val is not None and max_val is not None:
+
+                hrs = round(max(max_val - ref_val, 0), 1)
 
                 p["hrsporgid"][gid]  = hrs
                 p["tiene_dato"][gid] = True
@@ -197,7 +194,6 @@ def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
 
                 p["hrsporgid"][gid]  = 0.0
                 p["tiene_dato"][gid] = False
-
 
 # ── FIX 2: período 20→20 correcto ────────────────────────────────────────────
 
