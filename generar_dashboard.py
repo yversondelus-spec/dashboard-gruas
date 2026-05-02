@@ -267,8 +267,7 @@ def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
     all_rows = []
     seen_fechas = set()
 
-    for year in [2024, 2025, 2026]:
-
+    for year in range(2024, hoy.year + 1):
         excel_bytes.seek(0)
 
         rows = leer_fn(excel_bytes, year)
