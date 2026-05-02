@@ -1,31 +1,42 @@
 name: Actualizar Dashboard Grúas
+
 on:
   schedule:
     - cron: '0 11 * * *'
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   actualizar:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repositorio
         uses: actions/checkout@v4
+
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Instalar dependencias
         run: pip install requests pandas openpyxl
+
       - name: Generar dashboard
         env:
           SHEET_URL_IMPORT: ${{ secrets.SHEET_URL_IMPORT }}
           SHEET_URL_EXPORT: ${{ secrets.SHEET_URL_EXPORT }}
         run: python generar_dashboard.py
+
       - name: Commit y push index.html
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           git add index.html
+
           git diff --staged --quiet || git commit -m "Dashboard actualizado $(date +'%d/%m/%Y %H:%M')"
+
           git push
