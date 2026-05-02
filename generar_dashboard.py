@@ -138,24 +138,28 @@ def leer_hoja_export(excel_bytes, year):
         rows.append(entry)
     return rows
 
-# ── FIX 1: calcular diferencial SOLO dentro del mismo período ─────────────────
+# ── FIX: cálculo correcto de horas por período 20→20 ──────────────────────────
+
 def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
     """
-    Estrategia correcta:
-      horas_período = último_horómetro_dentro_del_período
-                    - último_horómetro_en_o_antes_del_inicio_del_período
-
-    Robusto ante semanas sin dato.
+    horas_período =
+        última lectura dentro del período
+        - última lectura en o antes del inicio
     """
 
     historial = {gid: [] for gid in grua_ids}
 
+    # Construir historial cronológico
     for row in all_rows_sorted:
+
         for gid in grua_ids:
+
             v = row.get(gid)
+
             if v is not None:
                 historial[gid].append((row["fecha"], v))
 
+    # Calcular horas para cada período
     for key, p in periodos.items():
 
         inicio = p["inicio"]
@@ -165,25 +169,26 @@ def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
 
             hist = historial[gid]
 
-            # referencia anterior al inicio
+            # Última lectura ANTES o EN inicio
             ref_val = None
 
             for fecha, val in hist:
+
                 if fecha <= inicio:
                     ref_val = val
 
-            # último valor dentro del período
-            last_val   = None
-            last_fecha = None
+            # Última lectura DENTRO del período
+            last_val = None
 
             for fecha, val in hist:
-                if inicio < fecha <= fin:
-                    last_val   = val
-                    last_fecha = fecha
 
+                if inicio < fecha <= fin:
+                    last_val = val
+
+            # Cálculo final
             if ref_val is not None and last_val is not None:
 
-                hrs = max(round(last_val - ref_val, 1), 0)
+                hrs = round(max(last_val - ref_val, 0), 1)
 
                 p["hrsporgid"][gid]  = hrs
                 p["tiene_dato"][gid] = True
@@ -192,82 +197,37 @@ def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
 
                 p["hrsporgid"][gid]  = 0.0
                 p["tiene_dato"][gid] = False
-    """
-    Calcula las horas trabajadas en cada semana como:
-        hrs = lectura_actual - lectura_anterior
 
-    REGLA CRÍTICA: solo se calcula el diferencial si ambas lecturas
-    pertenecen al MISMO período de corte (20 → 20).
-    Si la lectura anterior es de un período distinto, se descarta
-    para evitar que horas de meses anteriores contaminen el período actual.
-
-    Además, si el valor es None (mantención, pana, celda vacía) se omite
-    la semana pero se mantiene el último valor numérico válido como referencia
-    para el siguiente cálculo DENTRO del mismo período.
-    """
-    prev_val   = {gid: None for gid in grua_ids}
-    prev_fecha = {gid: None for gid in grua_ids}
-
-    for row in rows:
-        fecha_actual = row["fecha"]
-        curr_key, _, _, _ = periodo_key_label(fecha_actual)
-
-        for gid in grua_ids:
-            val = row.get(gid)
-            pv  = prev_val[gid]
-            pf  = prev_fecha[gid]
-
-            if isinstance(val, float) and pv is not None and pf is not None:
-                prev_key, _, _, _ = periodo_key_label(pf)
-                if curr_key == prev_key:
-                    # ✅ Misma período → diferencial válido
-                    row[f"{gid}_hrs"] = round(max(val - pv, 0), 1)
-                else:
-                    # ❌ Período distinto → NO contaminar con horas anteriores
-                    # La grúa arranca "de cero" en este período:
-                    # no tenemos referencia del inicio del período, así que sin dato.
-                    row[f"{gid}_hrs"] = None
-            else:
-                row[f"{gid}_hrs"] = None
-
-            # Actualizar referencia solo si hay valor numérico
-            if isinstance(val, float):
-                prev_val[gid]   = val
-                prev_fecha[gid] = fecha_actual
-
-    return rows
 
 # ── FIX 2: período 20→20 correcto ────────────────────────────────────────────
+
 def periodo_key_label(fecha):
-    """
-    El corte contractual va del día 20 de un mes al día 20 del siguiente.
-    - días 1-20  → pertenecen al período que cierra el día 20 de ese mes
-    - días 21-31 → pertenecen al período que cierra el día 20 del mes siguiente
-    """
+
     if fecha.day > 20:
-        # Segunda quincena: el período cierra el 20 del mes siguiente
+
         inicio = date(fecha.year, fecha.month, 20)
+
         if fecha.month == 12:
             fin = date(fecha.year + 1, 1, 20)
         else:
             fin = date(fecha.year, fecha.month + 1, 20)
+
     else:
-        # Primera quincena o día 20: el período cierra el 20 de este mes
+
         if fecha.month == 1:
             inicio = date(fecha.year - 1, 12, 20)
         else:
             inicio = date(fecha.year, fecha.month - 1, 20)
+
         fin = date(fecha.year, fecha.month, 20)
 
     key   = f"{inicio.strftime('%Y%m%d')}_{fin.strftime('%Y%m%d')}"
     label = f"20 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
+
     return key, label, inicio, fin
 
+
 def agrupar_estructura(rows, grua_ids, hoy):
-    """
-    Construye estructura de períodos.
-    NO calcula horas.
-    """
 
     periodos = {}
 
@@ -295,7 +255,7 @@ def agrupar_estructura(rows, grua_ids, hoy):
                 "tiene_dato": {gid: False for gid in grua_ids},
             }
 
-        # SOLO semanas del período
+        # registrar semanas reales del período
         if inicio < fecha <= fin:
 
             sem_str = fecha.strftime("%d/%m")
@@ -304,61 +264,50 @@ def agrupar_estructura(rows, grua_ids, hoy):
                 periodos[key]["semanas"].append(sem_str)
 
     return periodos
-    periodos = {}
-    for row in rows:
-        fecha = row["fecha"]
-        if fecha > hoy:
-            continue
-        key, label, inicio, fin = periodo_key_label(fecha)
-        if inicio > hoy:
-            continue
-        if key not in periodos:
-            periodos[key] = {
-                "key": key, "label": label,
-                "inicio": inicio, "fin": fin,
-                "semanas": [],
-                "hrsporgid":  {gid: 0.0  for gid in grua_ids},
-                "tiene_dato": {gid: False for gid in grua_ids},
-            }
-        periodos[key]["semanas"].append(fecha.strftime("%d/%m"))
-        for gid in grua_ids:
-            hrs = row.get(f"{gid}_hrs")
-            if hrs is not None:
-                periodos[key]["hrsporgid"][gid]  += hrs
-                periodos[key]["tiene_dato"][gid]  = True
-    return periodos
+
 
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
-    """
-    Lee las hojas de múltiples años, deduplica por fecha y calcula horas.
-    El orden de procesamiento (cronológico) es importante para el diferencial.
-    """
-    all_rows    = []
+
+    all_rows = []
     seen_fechas = set()
+
     for year in [2024, 2025, 2026]:
+
         excel_bytes.seek(0)
+
         rows = leer_fn(excel_bytes, year)
+
         if not rows:
             continue
+
         for row in rows:
+
             if row["fecha"] not in seen_fechas:
+
                 all_rows.append(row)
                 seen_fechas.add(row["fecha"])
 
     if not all_rows:
         return {}
 
-    # Ordenar cronológicamente para que el diferencial sea correcto
+    # Orden cronológico
     all_rows.sort(key=lambda r: r["fecha"])
-    periodos = agrupar_estructura(all_rows, grua_ids, hoy)
 
-calcular_horas_por_periodo(
-    all_rows,
-    grua_ids,
-    periodos
-)
+    # Crear estructura
+    periodos = agrupar_estructura(
+        all_rows,
+        grua_ids,
+        hoy
+    )
 
-return periodos
+    # Calcular horas reales
+    calcular_horas_por_periodo(
+        all_rows,
+        grua_ids,
+        periodos
+    )
+
+    return periodos
     
 
 def get_status(hrs, tiene_dato):
