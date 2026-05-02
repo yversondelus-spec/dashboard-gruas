@@ -350,8 +350,16 @@ def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
 
     # Ordenar cronológicamente para que el diferencial sea correcto
     all_rows.sort(key=lambda r: r["fecha"])
-    all_rows = calcular_horas_semanales(all_rows, grua_ids)
-    return agrupar_por_periodo(all_rows, grua_ids, hoy)
+    periodos = agrupar_estructura(all_rows, grua_ids, hoy)
+
+calcular_horas_por_periodo(
+    all_rows,
+    grua_ids,
+    periodos
+)
+
+return periodos
+    
 
 def get_status(hrs, tiene_dato):
     if not tiene_dato:
