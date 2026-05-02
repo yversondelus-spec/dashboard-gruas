@@ -139,7 +139,59 @@ def leer_hoja_export(excel_bytes, year):
     return rows
 
 # ── FIX 1: calcular diferencial SOLO dentro del mismo período ─────────────────
-def calcular_horas_semanales(rows, grua_ids):
+def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
+    """
+    Estrategia correcta:
+      horas_período = último_horómetro_dentro_del_período
+                    - último_horómetro_en_o_antes_del_inicio_del_período
+
+    Robusto ante semanas sin dato.
+    """
+
+    historial = {gid: [] for gid in grua_ids}
+
+    for row in all_rows_sorted:
+        for gid in grua_ids:
+            v = row.get(gid)
+            if v is not None:
+                historial[gid].append((row["fecha"], v))
+
+    for key, p in periodos.items():
+
+        inicio = p["inicio"]
+        fin    = p["fin"]
+
+        for gid in grua_ids:
+
+            hist = historial[gid]
+
+            # referencia anterior al inicio
+            ref_val = None
+
+            for fecha, val in hist:
+                if fecha <= inicio:
+                    ref_val = val
+
+            # último valor dentro del período
+            last_val   = None
+            last_fecha = None
+
+            for fecha, val in hist:
+                if inicio < fecha <= fin:
+                    last_val   = val
+                    last_fecha = fecha
+
+            if ref_val is not None and last_val is not None:
+
+                hrs = max(round(last_val - ref_val, 1), 0)
+
+                p["hrsporgid"][gid]  = hrs
+                p["tiene_dato"][gid] = True
+
+            else:
+
+                p["hrsporgid"][gid]  = 0.0
+                p["tiene_dato"][gid] = False
     """
     Calcula las horas trabajadas en cada semana como:
         hrs = lectura_actual - lectura_anterior
