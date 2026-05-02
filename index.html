@@ -445,6 +445,16 @@ function loadPeriodo() {
   const key = document.getElementById('periodo-sel').value;
   const d   = GRUAS_DATA[key];
   if (!d) return;
+  if (!imp) {
+
+    ['imp-ok','imp-prec','imp-alert','imp-limit'].forEach(id => {
+        document.getElementById(id).textContent = '—';
+    });
+
+    document.getElementById('grid-imp').innerHTML = '';
+
+    document.getElementById('tab-imp-badge').textContent = 'sin datos';
+}
 
   // Corte note
   document.getElementById('corte-txt').textContent =
