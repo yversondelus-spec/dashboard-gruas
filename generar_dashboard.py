@@ -263,7 +263,47 @@ def periodo_key_label(fecha):
     label = f"20 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
     return key, label, inicio, fin
 
-def agrupar_por_periodo(rows, grua_ids, hoy):
+def agrupar_estructura(rows, grua_ids, hoy):
+    """
+    Construye estructura de períodos.
+    NO calcula horas.
+    """
+
+    periodos = {}
+
+    for row in rows:
+
+        fecha = row["fecha"]
+
+        if fecha > hoy:
+            continue
+
+        key, label, inicio, fin = periodo_key_label(fecha)
+
+        if inicio > hoy:
+            continue
+
+        if key not in periodos:
+
+            periodos[key] = {
+                "key": key,
+                "label": label,
+                "inicio": inicio,
+                "fin": fin,
+                "semanas": [],
+                "hrsporgid":  {gid: 0.0 for gid in grua_ids},
+                "tiene_dato": {gid: False for gid in grua_ids},
+            }
+
+        # SOLO semanas del período
+        if inicio < fecha <= fin:
+
+            sem_str = fecha.strftime("%d/%m")
+
+            if sem_str not in periodos[key]["semanas"]:
+                periodos[key]["semanas"].append(sem_str)
+
+    return periodos
     periodos = {}
     for row in rows:
         fecha = row["fecha"]
