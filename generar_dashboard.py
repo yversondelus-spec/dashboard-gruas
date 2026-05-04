@@ -59,7 +59,8 @@ def download_excel(url, label=""):
         return None
     if "docs.google.com/spreadsheets" in url:
         sheet_id = url.split("/d/")[1].split("/")[0]
-        url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx"
+        import time
+url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx&t={int(time.time())}"
     print(f"Descargando Excel {label}...")
     r = requests.get(url, timeout=30)
     r.raise_for_status()
