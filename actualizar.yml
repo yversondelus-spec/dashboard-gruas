@@ -2,12 +2,13 @@ name: Actualizar Dashboard Grúas
 
 on:
   schedule:
-    - cron: '0 11 * * *'  # 08:00 AM Chile (UTC-3)
+    - cron: '0 11 * * *'
   workflow_dispatch:
 
 jobs:
   actualizar:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repositorio
         uses: actions/checkout@v4
@@ -22,9 +23,8 @@ jobs:
 
       - name: Generar dashboard
         env:
-          env:
-  SHEET_URL_IMPORT: ${{ secrets.SHEET_URL_IMPORT }}
-  SHEET_URL_EXPORT: ${{ secrets.SHEET_URL_EXPORT }}
+          SHEET_URL_IMPORT: ${{ secrets.SHEET_URL_IMPORT }}
+          SHEET_URL_EXPORT: ${{ secrets.SHEET_URL_EXPORT }}
         run: python generar_dashboard.py
 
       - name: Commit y push index.html
