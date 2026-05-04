@@ -97,7 +97,7 @@ def leer_hoja_import(excel_bytes, year):
         if int(sem) > 57:
             continue
         try:
-            fecha = pd.to_datetime(row.iloc[1]).date()
+            fecha = pd.to_datetime(row.iloc[1], dayfirst=True).date()
         except:
             continue
         entry = {"sem": int(sem), "fecha": fecha}
@@ -122,7 +122,7 @@ def leer_hoja_export(excel_bytes, year):
         if int(sem) > 57:
             continue
         try:
-            fecha = pd.to_datetime(row.iloc[1]).date()
+            fecha = pd.to_datetime(row.iloc[1], dayfirst=True).date()
         except:
             continue
         entry = {"sem": int(sem), "fecha": fecha}
