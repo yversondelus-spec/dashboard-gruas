@@ -22,7 +22,9 @@ jobs:
 
       - name: Generar dashboard
         env:
-          SHEET_URL: ${{ secrets.SHEET_URL }}
+          env:
+  SHEET_URL_IMPORT: ${{ secrets.SHEET_URL_IMPORT }}
+  SHEET_URL_EXPORT: ${{ secrets.SHEET_URL_EXPORT }}
         run: python generar_dashboard.py
 
       - name: Commit y push index.html
