@@ -144,6 +144,51 @@ def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
 
     historial = {gid: [] for gid in grua_ids}
 
+    # construir historial ordenado
+    for row in all_rows_sorted:
+
+        for gid in grua_ids:
+
+            v = row.get(gid)
+
+            if isinstance(v, (int, float)):
+                historial[gid].append((row["fecha"], float(v)))
+
+    # calcular períodos
+    for key, p in periodos.items():
+
+        inicio = p["inicio"]
+        fin    = p["fin"]
+
+        for gid in grua_ids:
+
+            hist = historial[gid]
+
+            valores_periodo = []
+
+            for fecha, val in hist:
+
+                if inicio <= fecha <= fin:
+                    valores_periodo.append(val)
+
+            # se necesitan mínimo 2 lecturas
+            if len(valores_periodo) >= 2:
+
+                hrs = round(
+                    max(valores_periodo[-1] - valores_periodo[0], 0),
+                    1
+                )
+
+                p["hrsporgid"][gid]  = hrs
+                p["tiene_dato"][gid] = True
+
+            else:
+
+                p["hrsporgid"][gid]  = 0.0
+                p["tiene_dato"][gid] = False
+
+    historial = {gid: [] for gid in grua_ids}
+
     # Historial completo
     for row in all_rows_sorted:
 
