@@ -1,4 +1,4 @@
-import os, sys, json, requests, pandas as pd
+import os, sys, json, requests, pandas as pd, time
 from datetime import datetime, date
 from io import BytesIO
 
@@ -59,19 +59,13 @@ def download_excel(url, label=""):
         return None
     if "docs.google.com/spreadsheets" in url:
         sheet_id = url.split("/d/")[1].split("/")[0]
-        import time
-url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx&t={int(time.time())}"
+        url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx&t={int(time.time())}"
     print(f"Descargando Excel {label}...")
     r = requests.get(url, timeout=30)
     r.raise_for_status()
     return BytesIO(r.content)
 
 def _parse_val(val):
-    """
-    Convierte el valor de la celda a float.
-    Si es texto no numérico (ej: 'MANTENCIÓN', 'PANA', '') retorna None.
-    None significa "sin dato" y NO se usa para calcular diferenciales.
-    """
     if pd.isna(val):
         return None
     if isinstance(val, str):
@@ -81,14 +75,13 @@ def _parse_val(val):
         try:
             return float(v)
         except ValueError:
-            return None   # texto descriptivo → ignorar
+            return None
     try:
         return float(val)
     except:
         return None
 
 def leer_hoja_import(excel_bytes, year):
-    """col0=Nº, col1=Fecha, cols2-7=Royal(skip), cols8-16=Linde(9 grúas)"""
     nombre = f"SEMANAS {year}"
     try:
         df = pd.read_excel(excel_bytes, sheet_name=nombre, header=None,
@@ -114,7 +107,6 @@ def leer_hoja_import(excel_bytes, year):
     return rows
 
 def leer_hoja_export(excel_bytes, year):
-    """col0=Nº, col1=Fecha, cols2-13=12 grúas export"""
     nombre = f"SEMANAS {year}"
     try:
         df = pd.read_excel(excel_bytes, sheet_name=nombre, header=None,
@@ -139,128 +131,50 @@ def leer_hoja_export(excel_bytes, year):
         rows.append(entry)
     return rows
 
-# ── FIX: cálculo correcto de horas por período 20→20 ──────────────────────────
-
 def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
 
     historial = {gid: [] for gid in grua_ids}
 
-    # construir historial ordenado
     for row in all_rows_sorted:
-
         for gid in grua_ids:
-
             v = row.get(gid)
-
             if isinstance(v, (int, float)):
                 historial[gid].append((row["fecha"], float(v)))
 
-    # calcular períodos
     for key, p in periodos.items():
-
         inicio = p["inicio"]
         fin    = p["fin"]
-
         for gid in grua_ids:
-
             hist = historial[gid]
-
-            valores_periodo = []
-
-            for fecha, val in hist:
-
-                if inicio <= fecha <= fin:
-                    valores_periodo.append(val)
-
-            # se necesitan mínimo 2 lecturas
-            if len(valores_periodo) >= 2:
-
-                hrs = round(
-                    max(valores_periodo[-1] - valores_periodo[0], 0),
-                    1
-                )
-
-                p["hrsporgid"][gid]  = hrs
-                p["tiene_dato"][gid] = True
-
-            else:
-
-                p["hrsporgid"][gid]  = 0.0
-                p["tiene_dato"][gid] = False
-
-    historial = {gid: [] for gid in grua_ids}
-
-    # Historial completo
-    for row in all_rows_sorted:
-
-        for gid in grua_ids:
-
-            v = row.get(gid)
-
-            if isinstance(v, (int, float)):
-                historial[gid].append((row["fecha"], float(v)))
-
-    # Calcular períodos
-    for key, p in periodos.items():
-
-        inicio = p["inicio"]
-        fin    = p["fin"]
-
-        for gid in grua_ids:
-
-            hist = historial[gid]
-
-            # referencia inicial
             ref_val = None
-
             for fecha, val in hist:
-
                 if fecha <= inicio:
                     ref_val = val
-
-            # máximo valor dentro del período
             max_val = None
-
             for fecha, val in hist:
-
                 if inicio < fecha <= fin:
-
                     if max_val is None or val > max_val:
                         max_val = val
-
-            # cálculo final
             if ref_val is not None and max_val is not None:
-
                 hrs = round(max(max_val - ref_val, 0), 1)
-
                 p["hrsporgid"][gid]  = hrs
                 p["tiene_dato"][gid] = True
-
             else:
-
                 p["hrsporgid"][gid]  = 0.0
                 p["tiene_dato"][gid] = False
 
-# ── FIX 2: período 20→20 correcto ────────────────────────────────────────────
-
 def periodo_key_label(fecha):
-
     if fecha.day > 20:
-
         inicio = date(fecha.year, fecha.month, 20)
-
         if fecha.month == 12:
             fin = date(fecha.year + 1, 1, 20)
         else:
             fin = date(fecha.year, fecha.month + 1, 20)
-
     else:
-
         if fecha.month == 1:
             inicio = date(fecha.year - 1, 12, 20)
         else:
             inicio = date(fecha.year, fecha.month - 1, 20)
-
         fin = date(fecha.year, fecha.month, 20)
 
     key   = f"{inicio.strftime('%Y%m%d')}_{fin.strftime('%Y%m%d')}"
@@ -268,25 +182,16 @@ def periodo_key_label(fecha):
 
     return key, label, inicio, fin
 
-
 def agrupar_estructura(rows, grua_ids, hoy):
-
     periodos = {}
-
     for row in rows:
-
         fecha = row["fecha"]
-
         if fecha > hoy:
             continue
-
         key, label, inicio, fin = periodo_key_label(fecha)
-
         if inicio > hoy:
             continue
-
         if key not in periodos:
-
             periodos[key] = {
                 "key": key,
                 "label": label,
@@ -296,60 +201,34 @@ def agrupar_estructura(rows, grua_ids, hoy):
                 "hrsporgid":  {gid: 0.0 for gid in grua_ids},
                 "tiene_dato": {gid: False for gid in grua_ids},
             }
-
-        # registrar semanas reales del período
         if inicio < fecha <= fin:
-
             sem_str = fecha.strftime("%d/%m")
-
             if sem_str not in periodos[key]["semanas"]:
                 periodos[key]["semanas"].append(sem_str)
-
     return periodos
 
-
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
-
     all_rows = []
     seen_fechas = set()
 
     for year in range(2024, hoy.year + 1):
         excel_bytes.seek(0)
-
         rows = leer_fn(excel_bytes, year)
-
         if not rows:
             continue
-
         for row in rows:
-
             if row["fecha"] not in seen_fechas:
-
                 all_rows.append(row)
                 seen_fechas.add(row["fecha"])
 
     if not all_rows:
         return {}
 
-    # Orden cronológico
     all_rows.sort(key=lambda r: r["fecha"])
-
-    # Crear estructura
-    periodos = agrupar_estructura(
-        all_rows,
-        grua_ids,
-        hoy
-    )
-
-    # Calcular horas reales
-    calcular_horas_por_periodo(
-        all_rows,
-        grua_ids,
-        periodos
-    )
+    periodos = agrupar_estructura(all_rows, grua_ids, hoy)
+    calcular_horas_por_periodo(all_rows, grua_ids, periodos)
 
     return periodos
-    
 
 def get_status(hrs, tiene_dato):
     if not tiene_dato:
