@@ -42,47 +42,42 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 /* ── SUBHEADER ── */
 .subheader{background:var(--bg2);border-bottom:2px solid var(--aerosan);
-  padding:12px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.filter-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);}
+  padding:12px 28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filter-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text2);white-space:nowrap;}
 .filter-select{background:#F8FAFC;border:1.5px solid var(--border);color:var(--text);
   font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:7px 14px;
-  border-radius:8px;cursor:pointer;outline:none;min-width:240px;
+  border-radius:8px;cursor:pointer;outline:none;min-width:200px;
   transition:border-color .2s,box-shadow .2s;}
+.filter-select-sm{min-width:110px;}
 .filter-select:hover,.filter-select:focus{border-color:var(--aerosan2);box-shadow:0 0 0 3px rgba(0,85,179,.1);}
-.sem-info{font-size:11px;color:var(--text3);margin-left:auto;}
+.filter-arrow{color:var(--text3);font-size:13px;padding:0 2px;}
+.sem-info{font-size:11px;color:var(--text3);margin-left:auto;white-space:nowrap;}
+.subheader-divider{width:1px;height:24px;background:var(--border);margin:0 4px;}
 
 /* ── CORTE NOTE ── */
 .corte-note{
   background:var(--aerosan-l);border-left:3px solid var(--aerosan2);
   padding:8px 28px;font-size:11px;color:var(--text2);
   font-family:'JetBrains Mono',monospace;letter-spacing:.3px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
 }
 .corte-note strong{color:var(--aerosan);}
+.corte-sem-badge{background:var(--aerosan2);color:#fff;border-radius:4px;
+  padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.5px;}
 
 /* ── TABS ── */
-.tabs-bar{
-  background:var(--bg2);
-  border-bottom:2px solid var(--border);
-  padding:0 28px;
-  display:flex;gap:4px;
-}
-.tab-btn{
-  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;
-  letter-spacing:1.5px;text-transform:uppercase;
-  padding:12px 28px;border:none;background:transparent;cursor:pointer;
-  color:var(--text2);border-bottom:3px solid transparent;
-  margin-bottom:-2px;transition:color .2s,border-color .2s;
-  display:flex;align-items:center;gap:8px;
-}
+.tabs-bar{background:var(--bg2);border-bottom:2px solid var(--border);padding:0 28px;display:flex;gap:4px;}
+.tab-btn{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:1.5px;text-transform:uppercase;padding:12px 28px;border:none;
+  background:transparent;cursor:pointer;color:var(--text2);
+  border-bottom:3px solid transparent;margin-bottom:-2px;
+  transition:color .2s,border-color .2s;display:flex;align-items:center;gap:8px;}
 .tab-btn:hover{color:var(--aerosan);}
 .tab-btn.active{color:var(--aerosan);border-bottom-color:var(--aerosan2);}
-.tab-btn .tab-badge{
-  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;
-  background:var(--aerosan-l);color:var(--aerosan2);
-}
+.tab-btn .tab-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;
+  background:var(--aerosan-l);color:var(--aerosan2);}
 .tab-btn.active .tab-badge{background:var(--aerosan2);color:#fff;}
-
-/* ── TAB PANELS ── */
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
 
@@ -147,25 +142,37 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .crane-footer .disp{color:var(--aerosan2);font-weight:600;}
 
 /* ── CHARTS ── */
-.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
 .chart-card{background:var(--card);border:1.5px solid var(--border);border-radius:10px;
-  padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:16px;}
 .chart-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
   color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .chart-dot{width:7px;height:7px;border-radius:50%;}
 .chart-dot.imp{background:var(--aerosan);}
 .chart-dot.exp{background:#059669;}
+.chart-dot.week{background:var(--aerosan2);}
 .chart-wrap{position:relative;height:240px;}
+.chart-wrap-sm{position:relative;height:180px;}
 canvas{max-height:240px;}
 .chart-note{font-size:10px;color:var(--limit);margin-top:6px;text-align:right;
   font-family:'JetBrains Mono',monospace;}
 
 /* ── NO DATA PANEL ── */
-.no-data-panel{
-  text-align:center;padding:60px 20px;color:var(--text3);
-  font-size:13px;
-}
+.no-data-panel{text-align:center;padding:60px 20px;color:var(--text3);font-size:13px;}
 .no-data-panel .icon{font-size:40px;margin-bottom:12px;}
+
+/* ── WEEK DETAIL TABLE ── */
+.week-detail-wrap{overflow-x:auto;}
+.week-detail-table{width:100%;border-collapse:collapse;font-size:11px;}
+.week-detail-table th{background:var(--aerosan-l);color:var(--aerosan);font-weight:700;
+  padding:7px 10px;text-align:center;border-bottom:2px solid var(--aerosan2);white-space:nowrap;}
+.week-detail-table th:first-child{text-align:left;}
+.week-detail-table td{padding:6px 10px;border-bottom:1px solid var(--border2);text-align:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;}
+.week-detail-table td:first-child{text-align:left;font-family:'Inter',sans-serif;font-weight:600;}
+.week-detail-table tr:hover td{background:#F0F7FF;}
+.week-detail-table .total-row td{font-weight:700;background:var(--aerosan-l);
+  color:var(--aerosan);border-top:2px solid var(--aerosan2);}
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
@@ -179,8 +186,9 @@ canvas{max-height:240px;}
   .tabs-bar{padding:0 12px;}
   .tab-btn{padding:10px 14px;font-size:12px;}
   .main{padding:16px 14px;}
-  .subheader{padding:10px 14px;}
+  .subheader{padding:10px 14px;gap:8px;}
   .corte-note{padding:8px 14px;}
+  .filter-select-sm{min-width:90px;}
 }
 </style>
 </head>
@@ -207,13 +215,28 @@ canvas{max-height:240px;}
   <select class="filter-select" id="periodo-sel" onchange="loadPeriodo()">
     {{PERIODO_OPTIONS}}
   </select>
+
+  <div class="subheader-divider"></div>
+
+  <span class="filter-label">📆 Semanas:</span>
+  <select class="filter-select filter-select-sm" id="sem-desde" onchange="onWeekFilter()">
+    <option value="-1">Todas</option>
+  </select>
+  <span class="filter-arrow">→</span>
+  <select class="filter-select filter-select-sm" id="sem-hasta" onchange="onWeekFilter()">
+    <option value="-1">Todas</option>
+  </select>
+
   <span class="sem-info" id="sem-info">—</span>
 </div>
 
 <!-- ══ CORTE NOTE ════════════════════════════════════════════════════════ -->
-<div class="corte-note" id="corte-note">
-  ✂️ Corte contractual: <strong id="corte-txt">—</strong>
-  &nbsp;·&nbsp; Período de 30 días entre día 20 del mes anterior y día 20 del mes actual.
+<div class="corte-note">
+  📅 Período: <strong id="corte-txt">—</strong>
+  &nbsp;·&nbsp;
+  <span id="corte-sem-rng">Todas las semanas</span>
+  &nbsp;·&nbsp;
+  Período mensual · Selecciona semanas para filtrar el acumulado.
 </div>
 
 <!-- ══ TABS ══════════════════════════════════════════════════════════════ -->
@@ -255,7 +278,10 @@ canvas{max-height:240px;}
         <div class="kpi-sub">≥ {{LIMIT_HRS}} hrs — costo extra</div>
       </div>
     </div>
+
     <div class="crane-grid" id="grid-imp"></div>
+
+    <!-- Horas acumuladas + donut -->
     <div class="charts-row">
       <div class="chart-card">
         <div class="chart-title"><span class="chart-dot imp"></span>HORAS ACUMULADAS — IMPORT</div>
@@ -265,6 +291,23 @@ canvas{max-height:240px;}
       <div class="chart-card">
         <div class="chart-title"><span class="chart-dot imp"></span>DISTRIBUCIÓN DE ESTADO</div>
         <div class="chart-wrap"><canvas id="donutImp"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Horas por semana (nuevo) -->
+    <div class="chart-card" id="week-card-imp">
+      <div class="chart-title"><span class="chart-dot week"></span>HORAS POR SEMANA — IMPORT</div>
+      <div class="chart-wrap-sm"><canvas id="weekBarImp" style="max-height:180px;"></canvas></div>
+    </div>
+
+    <!-- Tabla detalle por semana (nuevo) -->
+    <div class="chart-card" id="week-table-imp">
+      <div class="chart-title"><span class="chart-dot week"></span>DETALLE POR SEMANA — IMPORT</div>
+      <div class="week-detail-wrap">
+        <table class="week-detail-table" id="tbl-imp">
+          <thead><tr><th>Grúa</th></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -294,7 +337,9 @@ canvas{max-height:240px;}
           <div class="kpi-sub">≥ {{LIMIT_HRS}} hrs — costo extra</div>
         </div>
       </div>
+
       <div class="crane-grid" id="grid-exp"></div>
+
       <div class="charts-row">
         <div class="chart-card">
           <div class="chart-title"><span class="chart-dot exp"></span>HORAS ACUMULADAS — EXPORT</div>
@@ -306,7 +351,25 @@ canvas{max-height:240px;}
           <div class="chart-wrap"><canvas id="donutExp"></canvas></div>
         </div>
       </div>
-    </div>
+
+      <!-- Horas por semana Export -->
+      <div class="chart-card" id="week-card-exp">
+        <div class="chart-title"><span class="chart-dot week"></span>HORAS POR SEMANA — EXPORT</div>
+        <div class="chart-wrap-sm"><canvas id="weekBarExp" style="max-height:180px;"></canvas></div>
+      </div>
+
+      <!-- Tabla detalle Export -->
+      <div class="chart-card" id="week-table-exp">
+        <div class="chart-title"><span class="chart-dot week"></span>DETALLE POR SEMANA — EXPORT</div>
+        <div class="week-detail-wrap">
+          <table class="week-detail-table" id="tbl-exp">
+            <thead><tr><th>Grúa</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /exp-content -->
+
     <div class="no-data-panel" id="exp-nodata" style="display:none">
       <div class="icon">📭</div>
       Sin datos de exportaciones para este período.
@@ -316,185 +379,433 @@ canvas{max-height:240px;}
 </div><!-- /main -->
 
 <script>
-const GRUAS_DATA     = {{GRUAS_JS_DATA}};
+/* ═══════════════════════════════════════════════════════════════════════
+   DATOS INYECTADOS POR generar_dashboard.py
+═══════════════════════════════════════════════════════════════════════ */
+const GRUAS_DATA    = {{GRUAS_JS_DATA}};
 const PERIODO_ACTUAL = "{{PERIODO_ACTUAL}}";
-const TIENE_EXPORT   = {{TIENE_EXPORT}};
-const LIMIT_HRS      = {{LIMIT_HRS}};
+const TIENE_EXPORT  = {{TIENE_EXPORT}};
+const LIMIT_HRS     = {{LIMIT_HRS}};
 
+/* ═══════════════════════════════════════════════════════════════════════
+   ESTADO
+═══════════════════════════════════════════════════════════════════════ */
 let activeTab = 'imp';
-let charts = {};
+let charts    = {};
+let semDesde  = 0;
+let semHasta  = 999;
 
+/* ═══════════════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════════════ */
+function getStatus(hrs, tieneDato) {
+  if (!tieneDato) return {key:'no-data', label:'Sin dato', cls:'no-data'};
+  const pct = hrs / LIMIT_HRS;
+  if (hrs >= LIMIT_HRS) return {key:'limit',      label:'Límite Superado', cls:'limit'};
+  if (pct >= 0.86)      return {key:'alert',      label:'Alerta',          cls:'alert'};
+  if (pct >= 0.60)      return {key:'precaution', label:'Precaución',      cls:'precaution'};
+  return                       {key:'ok',          label:'OK',              cls:'ok'};
+}
+
+function round1(v) { return Math.round(v * 10) / 10; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARD BUILDER (JS — ya no pre-generado en Python)
+═══════════════════════════════════════════════════════════════════════ */
+function buildCard(g, idx) {
+  const st   = getStatus(g.hrs, g.tieneDato);
+  const pct  = g.tieneDato ? Math.min(g.hrs / LIMIT_HRS * 100, 100) : 0;
+  const disp = g.tieneDato ? Math.max(LIMIT_HRS - g.hrs, 0) : LIMIT_HRS;
+  const val  = g.tieneDato ? g.hrs.toFixed(1) : '—';
+  const delay = (idx * 0.04).toFixed(2);
+  return `<div class="crane-card s-${st.cls}" style="animation-delay:${delay}s">
+  <div class="crane-header">
+    <div class="crane-name">${g.id}</div>
+    <div class="status-badge ${st.cls}">● ${st.label}</div>
+  </div>
+  <div class="crane-plate">BAJA · ${g.empresa}</div>
+  <div class="crane-km">
+    <span class="crane-km-val">${val}</span>
+    <span class="crane-km-of">/ ${LIMIT_HRS} hrs</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill ${st.cls}" style="width:${pct.toFixed(0)}%"></div></div>
+  <div class="crane-footer">
+    <span class="crane-pct">${pct.toFixed(0)}% del límite</span>
+    <span class="disp">${disp.toFixed(0)} hrs disp.</span>
+  </div>
+</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FILTRAR POR RANGO DE SEMANAS
+═══════════════════════════════════════════════════════════════════════ */
+function computeFiltered(entry, desde, hasta) {
+  let ok=0, prec=0, alert=0, limit=0;
+  const nSem   = entry.semanas.length;
+  const hiReal = Math.min(hasta, nSem - 1);
+
+  const filtered = entry.gruas_raw.map(g => {
+    let hrs   = 0;
+    let tiene = false;
+    const sems = g.hrs_semanas || [];
+    for (let i = desde; i <= hiReal; i++) {
+      if (sems[i] != null) { hrs += sems[i]; tiene = true; }
+    }
+    hrs = round1(hrs);
+    const st = getStatus(hrs, tiene);
+    if      (st.key === 'ok')         ok++;
+    else if (st.key === 'precaution') prec++;
+    else if (st.key === 'alert')      alert++;
+    else if (st.key === 'limit')      limit++;
+    return { ...g, hrs, tieneDato: tiene };
+  });
+
+  return { filtered, ok, prec, alert, limit };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RENDER TAB
+═══════════════════════════════════════════════════════════════════════ */
+function renderTab(tab, entry, desde, hasta) {
+  if (!entry) return;
+  const C = tab === 'imp' ? 'Imp' : 'Exp';
+  const nSem   = entry.semanas.length;
+  const hiReal = Math.min(hasta, nSem - 1);
+
+  const { filtered, ok, prec, alert, limit } = computeFiltered(entry, desde, hiReal);
+  const barData = filtered.map(g => g.tieneDato ? g.hrs : 0);
+
+  // KPIs
+  document.getElementById(`${tab}-ok`).textContent    = ok;
+  document.getElementById(`${tab}-prec`).textContent  = prec;
+  document.getElementById(`${tab}-alert`).textContent = alert;
+  document.getElementById(`${tab}-limit`).textContent = limit;
+  document.getElementById(`tab-${tab}-badge`).textContent =
+    `${ok+prec+alert+limit} grúas`;
+
+  // Cards
+  document.getElementById(`grid-${tab}`).innerHTML =
+    filtered.map((g, i) => buildCard(g, i)).join('');
+
+  // Bar chart (totales filtrados)
+  charts[`bar${C}`] = makeBar(`bar${C}`, entry.bar_labels, barData,
+                               entry.bar_colors, charts[`bar${C}`]);
+
+  // Donut
+  charts[`donut${C}`] = makeDonut(`donut${C}`, ok, prec, alert, limit,
+                                   charts[`donut${C}`]);
+
+  // Per-week chart
+  renderWeekChart(tab, entry, desde, hiReal);
+
+  // Per-week table
+  renderWeekTable(tab, entry, desde, hiReal);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GRÁFICO HORAS POR SEMANA (total flota)
+═══════════════════════════════════════════════════════════════════════ */
+function renderWeekChart(tab, entry, desde, hasta) {
+  const C       = tab === 'imp' ? 'Imp' : 'Exp';
+  const canvasId = `weekBar${C}`;
+  const semanas  = (entry.semanas || []).slice(desde, hasta + 1);
+
+  // Horas totales por semana (suma de todas las grúas)
+  const weekTotals = semanas.map((_, wi) => {
+    const idx = desde + wi;
+    let total = 0;
+    entry.gruas_raw.forEach(g => {
+      const v = (g.hrs_semanas || [])[idx];
+      if (v != null) total += v;
+    });
+    return round1(total);
+  });
+
+  if (charts[`week${C}`]) charts[`week${C}`].destroy();
+  if (!semanas.length) return;
+
+  // Color por semana según si es alta/normal/baja actividad
+  const maxT = Math.max(...weekTotals, 1);
+  const barColors = weekTotals.map(v => {
+    const pct = v / maxT;
+    if (pct >= 0.85) return '#DC2626';
+    if (pct >= 0.60) return '#EA580C';
+    return '#0099D6';
+  });
+
+  charts[`week${C}`] = new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels: semanas,
+      datasets: [{
+        label: 'Horas totales flota',
+        data:  weekTotals,
+        backgroundColor: barColors,
+        borderRadius: {topLeft:4, topRight:4},
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        tooltip: {
+          callbacks: {
+            label: c => ` ${c.raw} hrs`,
+            title: t => `Semana ${t[0].label}`
+          }
+        }
+      },
+      scales: {
+        x: {ticks:{color:'#4B6585',font:{size:11}}, grid:{color:'#DDEAF5'}},
+        y: {min:0,
+            ticks:{color:'#4B6585'},
+            grid:{color:'#DDEAF5'},
+            title:{display:true, text:'Horas (flota total)', color:'#4B6585', font:{size:10}}}
+      },
+      animation: {duration:600, easing:'easeOutQuart'}
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TABLA DETALLE POR SEMANA
+═══════════════════════════════════════════════════════════════════════ */
+function renderWeekTable(tab, entry, desde, hasta) {
+  const tbl   = document.getElementById(`tbl-${tab}`);
+  const sems  = (entry.semanas || []).slice(desde, hasta + 1);
+  if (!sems.length) { tbl.innerHTML = ''; return; }
+
+  // Header
+  let head = '<tr><th>Grúa</th>';
+  sems.forEach(s => { head += `<th>${s}</th>`; });
+  head += '<th>Total</th></tr>';
+
+  // Rows
+  let body = '';
+  entry.gruas_raw.forEach(g => {
+    let rowTotal = 0;
+    let hasDato  = false;
+    let cells    = '';
+    for (let i = desde; i <= hasta; i++) {
+      const v = (g.hrs_semanas || [])[i];
+      if (v != null) {
+        cells    += `<td>${v.toFixed(1)}</td>`;
+        rowTotal += v;
+        hasDato   = true;
+      } else {
+        cells += `<td style="color:#CBD5E1">—</td>`;
+      }
+    }
+    const total = hasDato ? rowTotal.toFixed(1) : '—';
+    body += `<tr><td>${g.id}</td>${cells}<td><strong>${total}</strong></td></tr>`;
+  });
+
+  // Totales por semana
+  let totalCells = '';
+  let grandTotal = 0;
+  for (let i = desde; i <= hasta; i++) {
+    let colSum = 0;
+    entry.gruas_raw.forEach(g => {
+      const v = (g.hrs_semanas || [])[i];
+      if (v != null) colSum += v;
+    });
+    grandTotal += colSum;
+    totalCells += `<td>${colSum.toFixed(1)}</td>`;
+  }
+  body += `<tr class="total-row"><td>TOTAL FLOTA</td>${totalCells}<td>${grandTotal.toFixed(1)}</td></tr>`;
+
+  tbl.querySelector('thead').innerHTML = head;
+  tbl.querySelector('tbody').innerHTML = body;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SELECTORES DE SEMANA
+═══════════════════════════════════════════════════════════════════════ */
+function populateWeekSelectors(semanas) {
+  const desdeEl = document.getElementById('sem-desde');
+  const hastaEl = document.getElementById('sem-hasta');
+
+  desdeEl.innerHTML = '<option value="-1">Todas</option>';
+  hastaEl.innerHTML = '<option value="-1">Todas</option>';
+
+  semanas.forEach((s, i) => {
+    desdeEl.innerHTML += `<option value="${i}">Sem. ${s}</option>`;
+    hastaEl.innerHTML += `<option value="${i}">Sem. ${s}</option>`;
+  });
+
+  desdeEl.value = '-1';
+  hastaEl.value = '-1';
+  semDesde = 0;
+  semHasta = semanas.length - 1;
+}
+
+function onWeekFilter() {
+  const key = document.getElementById('periodo-sel').value;
+  const d   = GRUAS_DATA[key];
+  if (!d) return;
+
+  const entry    = d.imp || d.exp;
+  const nSem     = entry ? entry.semanas.length : 0;
+  const desdeVal = parseInt(document.getElementById('sem-desde').value);
+  const hastaVal = parseInt(document.getElementById('sem-hasta').value);
+
+  semDesde = desdeVal < 0 ? 0       : desdeVal;
+  semHasta = hastaVal  < 0 ? nSem-1 : hastaVal;
+
+  // Validar coherencia
+  if (semDesde > semHasta) semDesde = semHasta;
+
+  // Actualizar nota
+  const semanas  = entry ? entry.semanas : [];
+  const allWeeks = semDesde === 0 && semHasta === nSem - 1;
+  const rngText  = allWeeks
+    ? 'Todas las semanas'
+    : `Semanas ${semanas[semDesde]} → ${semanas[semHasta]}`;
+  document.getElementById('corte-sem-rng').textContent = rngText;
+
+  renderCurrentTab(d);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOAD PERÍODO
+═══════════════════════════════════════════════════════════════════════ */
+function loadPeriodo() {
+  const key = document.getElementById('periodo-sel').value;
+  const d   = GRUAS_DATA[key];
+  if (!d) return;
+
+  // Nota de período
+  document.getElementById('corte-txt').textContent = d.label;
+
+  // Poblamos selectores de semana
+  const entry   = d.imp || d.exp;
+  const semanas = entry ? entry.semanas : [];
+  populateWeekSelectors(semanas);
+
+  // sem-info
+  const nS = semanas.length;
+  document.getElementById('sem-info').textContent =
+    `${nS} semana${nS !== 1 ? 's' : ''} registradas`;
+
+  // Nota rango
+  document.getElementById('corte-sem-rng').textContent = 'Todas las semanas';
+
+  // Badges tabs
+  if (d.imp) {
+    const n = d.imp.ok + d.imp.prec + d.imp.alert + d.imp.limit;
+    document.getElementById('tab-imp-badge').textContent = `${n} grúas`;
+  }
+  if (d.exp) {
+    const n = d.exp.ok + d.exp.prec + d.exp.alert + d.exp.limit;
+    document.getElementById('tab-exp-badge').textContent = `${n} grúas`;
+  } else {
+    document.getElementById('tab-exp-badge').textContent = 'sin datos';
+  }
+
+  renderCurrentTab(d);
+}
+
+function renderCurrentTab(d) {
+  if (activeTab === 'imp') {
+    if (d.imp) renderTab('imp', d.imp, semDesde, semHasta);
+  } else {
+    if (d.exp) {
+      document.getElementById('exp-content').style.display = '';
+      document.getElementById('exp-nodata').style.display  = 'none';
+      renderTab('exp', d.exp, semDesde, semHasta);
+    } else {
+      document.getElementById('exp-content').style.display = 'none';
+      document.getElementById('exp-nodata').style.display  = '';
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SWITCH TAB
+═══════════════════════════════════════════════════════════════════════ */
 function switchTab(tab) {
   activeTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById(`tab-${tab}-btn`).classList.add('active');
   document.getElementById(`panel-${tab}`).classList.add('active');
+  const key = document.getElementById('periodo-sel').value;
+  const d   = GRUAS_DATA[key];
+  if (d) renderCurrentTab(d);
 }
 
-function makeBar(canvasId, labels, data, color, existingChart) {
-  if (existingChart) existingChart.destroy();
-  // Eje Y: máximo = límite + 20% de margen, redondeado hacia arriba
-  const maxData  = Math.max(...data, LIMIT_HRS);
-  const yMax     = Math.ceil((maxData * 1.15) / 20) * 20;
+/* ═══════════════════════════════════════════════════════════════════════
+   CHART BUILDERS
+═══════════════════════════════════════════════════════════════════════ */
+function makeBar(canvasId, labels, data, color, existing) {
+  if (existing) existing.destroy();
+  const maxData = Math.max(...data, LIMIT_HRS);
+  const yMax    = Math.ceil((maxData * 1.15) / 20) * 20;
   return new Chart(document.getElementById(canvasId), {
     type: 'bar',
     data: {
       labels,
       datasets: [
-        {
-          label: 'Horas',
-          data,
-          backgroundColor: color,
-          borderRadius: {topLeft:4, topRight:4},
-          stack: 'hrs',
-          order: 2
-        },
-        {
-          label: `Límite ${LIMIT_HRS} hrs`,
-          data: Array(labels.length).fill(LIMIT_HRS),
-          type: 'line',
-          borderColor: '#DC2626',
-          borderWidth: 1.5,
-          borderDash: [5,4],
-          pointRadius: 0,
-          fill: false,
-          order: 1
-        }
+        {label:'Horas', data, backgroundColor:color,
+         borderRadius:{topLeft:4,topRight:4}, stack:'hrs', order:2},
+        {label:`Límite ${LIMIT_HRS} hrs`,
+         data:Array(labels.length).fill(LIMIT_HRS),
+         type:'line', borderColor:'#DC2626', borderWidth:1.5,
+         borderDash:[5,4], pointRadius:0, fill:false, order:1}
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {color:'#4B6585', font:{size:11}, usePointStyle:true, padding:12}
-        },
-        tooltip: {
-          callbacks: {
-            label: c => c.datasetIndex === 0
-              ? ` ${c.raw} hrs`
-              : ` Límite ${LIMIT_HRS} hrs`
-          }
-        }
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true, position:'top',
+          labels:{color:'#4B6585',font:{size:11},usePointStyle:true,padding:12}},
+        tooltip:{callbacks:{
+          label:c=>c.datasetIndex===0?` ${c.raw} hrs`:` Límite ${LIMIT_HRS} hrs`
+        }}
       },
-      scales: {
-        x: {
-          stacked: true,
-          ticks: {color:'#4B6585', font:{size:10}, maxRotation:35},
-          grid: {color:'#DDEAF5'}
-        },
-        y: {
-          stacked: true,
-          min: 0,
-          max: yMax,
-          ticks: {color:'#4B6585'},
-          grid: {color:'#DDEAF5'},
-          title: {
-            display: true,
-            text: 'Horas acumuladas',
-            color: '#4B6585',
-            font: {size:10}
-          }
-        }
+      scales:{
+        x:{stacked:true, ticks:{color:'#4B6585',font:{size:10},maxRotation:35}, grid:{color:'#DDEAF5'}},
+        y:{stacked:true, min:0, max:yMax,
+           ticks:{color:'#4B6585'}, grid:{color:'#DDEAF5'},
+           title:{display:true, text:'Horas acumuladas', color:'#4B6585', font:{size:10}}}
       },
-      animation: {duration:700, easing:'easeOutQuart'}
+      animation:{duration:700, easing:'easeOutQuart'}
     }
   });
 }
 
-function makeDonut(canvasId, ok, prec, alert, limit, existingChart) {
-  if (existingChart) existingChart.destroy();
+function makeDonut(canvasId, ok, prec, alert, limit, existing) {
+  if (existing) existing.destroy();
   const estados = [
-    {l:'✅ OK',         v:ok,    c:'#16A34A'},
-    {l:'⚠️ Precaución', v:prec,  c:'#D97706'},
-    {l:'🔶 Alerta',     v:alert, c:'#EA580C'},
-    {l:'🔴 Límite',     v:limit, c:'#DC2626'},
+    {l:'✅ OK',          v:ok,    c:'#16A34A'},
+    {l:'⚠️ Precaución',  v:prec,  c:'#D97706'},
+    {l:'🔶 Alerta',      v:alert, c:'#EA580C'},
+    {l:'🔴 Límite',      v:limit, c:'#DC2626'},
   ].filter(x => x.v > 0);
   if (!estados.length) estados.push({l:'Sin dato', v:1, c:'#CBD5E1'});
   return new Chart(document.getElementById(canvasId), {
-    type: 'doughnut',
-    data: {
-      labels: estados.map(x => x.l),
-      datasets: [{
-        data: estados.map(x => x.v),
-        backgroundColor: estados.map(x => x.c),
-        borderColor: '#FFFFFF',
-        borderWidth: 3,
-        hoverOffset: 8
-      }]
+    type:'doughnut',
+    data:{
+      labels:estados.map(x=>x.l),
+      datasets:[{data:estados.map(x=>x.v), backgroundColor:estados.map(x=>x.c),
+                 borderColor:'#FFFFFF', borderWidth:3, hoverOffset:8}]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '62%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {color:'#4B6585', font:{size:11}, padding:14, usePointStyle:true}
-        }
-      },
-      animation: {animateRotate:true, duration:800}
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{legend:{position:'bottom',
+        labels:{color:'#4B6585',font:{size:11},padding:14,usePointStyle:true}}},
+      animation:{animateRotate:true, duration:800}
     }
   });
 }
 
-function loadPeriodo() {
-  const key = document.getElementById('periodo-sel').value;
-  const d   = GRUAS_DATA[key];
-  if (!d) return;
-
-  // Corte note
-  document.getElementById('corte-txt').textContent =
-    `${d.inicio_label} → ${d.fin_label}`;
-
-  // ── IMPORT ──────────────────────────────────────────────────────────
-  const imp = d.imp;
-  if (imp) {
-    document.getElementById('imp-ok').textContent    = imp.ok;
-    document.getElementById('imp-prec').textContent  = imp.prec;
-    document.getElementById('imp-alert').textContent = imp.alert;
-    document.getElementById('imp-limit').textContent = imp.limit;
-    document.getElementById('grid-imp').innerHTML    = imp.cards;
-    document.getElementById('tab-imp-badge').textContent =
-      `${imp.ok + imp.prec + imp.alert + imp.limit} grúas`;
-    document.getElementById('sem-info').textContent =
-      `${imp.n_sem} semana${imp.n_sem !== 1 ? 's' : ''} registradas`;
-
-    charts.barImp   = makeBar('barImp',   imp.bar_labels, imp.bar_data, imp.bar_colors, charts.barImp);
-    charts.donutImp = makeDonut('donutImp', imp.ok, imp.prec, imp.alert, imp.limit, charts.donutImp);
-  }
-
-  // ── EXPORT ──────────────────────────────────────────────────────────
-  const exp = d.exp;
-  if (exp) {
-    document.getElementById('exp-ok').textContent    = exp.ok;
-    document.getElementById('exp-prec').textContent  = exp.prec;
-    document.getElementById('exp-alert').textContent = exp.alert;
-    document.getElementById('exp-limit').textContent = exp.limit;
-    document.getElementById('grid-exp').innerHTML    = exp.cards;
-    document.getElementById('tab-exp-badge').textContent =
-      `${exp.ok + exp.prec + exp.alert + exp.limit} grúas`;
-    document.getElementById('exp-content').style.display = '';
-    document.getElementById('exp-nodata').style.display  = 'none';
-
-    charts.barExp   = makeBar('barExp',   exp.bar_labels, exp.bar_data, exp.bar_colors, charts.barExp);
-    charts.donutExp = makeDonut('donutExp', exp.ok, exp.prec, exp.alert, exp.limit, charts.donutExp);
-  } else {
-    document.getElementById('exp-content').style.display = 'none';
-    document.getElementById('exp-nodata').style.display  = '';
-    document.getElementById('tab-exp-badge').textContent = 'sin datos';
-  }
-}
-
+/* ═══════════════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════════════ */
 window.addEventListener('load', () => {
-  // Ocultar tab export si no hay archivo configurado
   if (!TIENE_EXPORT) {
     document.getElementById('tab-exp-btn').style.display = 'none';
   }
-  // Seleccionar período actual
   const sel = document.getElementById('periodo-sel');
   for (let opt of sel.options) {
     if (opt.value === PERIODO_ACTUAL) { sel.value = PERIODO_ACTUAL; break; }
