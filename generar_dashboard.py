@@ -1,16 +1,19 @@
 import os, sys, json, requests, pandas as pd, time
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from io import BytesIO
 
-# ── Configuración ────────────────────────────────────────────────────────────
+# ── Configuración ─────────────────────────────────────────────────────────────
 LIMIT_HRS     = 120
 SHEET_URL_IMP = os.environ.get("SHEET_URL_IMPORT", "")
 SHEET_URL_EXP = os.environ.get("SHEET_URL_EXPORT", "")
 
 MESES_ES = {1:"Ene",2:"Feb",3:"Mar",4:"Abr",5:"May",6:"Jun",
             7:"Jul",8:"Ago",9:"Sep",10:"Oct",11:"Nov",12:"Dic"}
+MESES_FULL = {1:"Enero",2:"Febrero",3:"Marzo",4:"Abril",5:"Mayo",6:"Junio",
+              7:"Julio",8:"Agosto",9:"Septiembre",10:"Octubre",
+              11:"Noviembre",12:"Diciembre"}
 
-# ── FLOTA IMPORT: solo Linde ──────────────────────────────────────────────────
+# ── FLOTA IMPORT ──────────────────────────────────────────────────────────────
 GRUAS_IMPORT = [
     {"id":"LINDE 11728","empresa":"Linde Leasing"},
     {"id":"LINDE 11731","empresa":"Linde Leasing"},
@@ -131,55 +134,16 @@ def leer_hoja_export(excel_bytes, year):
         rows.append(entry)
     return rows
 
-def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
-
-    historial = {gid: [] for gid in grua_ids}
-
-    for row in all_rows_sorted:
-        for gid in grua_ids:
-            v = row.get(gid)
-            if isinstance(v, (int, float)):
-                historial[gid].append((row["fecha"], float(v)))
-
-    for key, p in periodos.items():
-        inicio = p["inicio"]
-        fin    = p["fin"]
-        for gid in grua_ids:
-            hist = historial[gid]
-            ref_val = None
-            for fecha, val in hist:
-                if fecha <= inicio:
-                    ref_val = val
-            max_val = None
-            for fecha, val in hist:
-                if inicio < fecha <= fin:
-                    if max_val is None or val > max_val:
-                        max_val = val
-            if ref_val is not None and max_val is not None:
-                hrs = round(max(max_val - ref_val, 0), 1)
-                p["hrsporgid"][gid]  = hrs
-                p["tiene_dato"][gid] = True
-            else:
-                p["hrsporgid"][gid]  = 0.0
-                p["tiene_dato"][gid] = False
-
-def periodo_key_label(fecha):
-    if fecha.day > 20:
-        inicio = date(fecha.year, fecha.month, 20)
-        if fecha.month == 12:
-            fin = date(fecha.year + 1, 1, 20)
-        else:
-            fin = date(fecha.year, fecha.month + 1, 20)
+# ── NUEVO: agrupación por mes calendario (reemplaza lógica 20-20) ─────────────
+def periodo_key_mes(fecha):
+    """Agrupa por mes calendario completo (1 al último día del mes)."""
+    key   = f"{fecha.year}{fecha.month:02d}"
+    label = f"{MESES_FULL[fecha.month]} {fecha.year}"
+    inicio = date(fecha.year, fecha.month, 1)
+    if fecha.month == 12:
+        fin = date(fecha.year + 1, 1, 1) - timedelta(days=1)
     else:
-        if fecha.month == 1:
-            inicio = date(fecha.year - 1, 12, 20)
-        else:
-            inicio = date(fecha.year, fecha.month - 1, 20)
-        fin = date(fecha.year, fecha.month, 20)
-
-    key   = f"{inicio.strftime('%Y%m%d')}_{fin.strftime('%Y%m%d')}"
-    label = f"20 {MESES_ES[inicio.month]} – 20 {MESES_ES[fin.month]} {fin.year}"
-
+        fin = date(fecha.year, fecha.month + 1, 1) - timedelta(days=1)
     return key, label, inicio, fin
 
 def agrupar_estructura(rows, grua_ids, hoy):
@@ -188,27 +152,85 @@ def agrupar_estructura(rows, grua_ids, hoy):
         fecha = row["fecha"]
         if fecha > hoy:
             continue
-        key, label, inicio, fin = periodo_key_label(fecha)
-        if inicio > hoy:
-            continue
+        key, label, inicio, fin = periodo_key_mes(fecha)
         if key not in periodos:
             periodos[key] = {
-                "key": key,
-                "label": label,
-                "inicio": inicio,
-                "fin": fin,
-                "semanas": [],
-                "hrsporgid":  {gid: 0.0 for gid in grua_ids},
-                "tiene_dato": {gid: False for gid in grua_ids},
+                "key":            key,
+                "label":          label,
+                "inicio":         inicio,
+                "fin":            fin,
+                "semanas":        [],       # "dd/mm" strings
+                "semanas_fechas": [],       # date objects (para cálculo)
+                "hrsporgid":      {gid: 0.0   for gid in grua_ids},
+                "tiene_dato":     {gid: False  for gid in grua_ids},
+                "hrs_por_semana": {gid: []     for gid in grua_ids},
             }
-        if inicio < fecha <= fin:
-            sem_str = fecha.strftime("%d/%m")
-            if sem_str not in periodos[key]["semanas"]:
-                periodos[key]["semanas"].append(sem_str)
+        sem_str = fecha.strftime("%d/%m")
+        if sem_str not in periodos[key]["semanas"]:
+            periodos[key]["semanas"].append(sem_str)
+            periodos[key]["semanas_fechas"].append(fecha)
+
+    # Ordenar semanas cronológicamente dentro de cada período
+    for key, p in periodos.items():
+        pares = sorted(zip(p["semanas_fechas"], p["semanas"]))
+        p["semanas_fechas"] = [x[0] for x in pares]
+        p["semanas"]        = [x[1] for x in pares]
+
     return periodos
 
+def calcular_horas_por_periodo(all_rows_sorted, grua_ids, periodos):
+    """
+    Para cada semana dentro del mes calcula el delta del horómetro
+    respecto a la lectura inmediatamente anterior (puede ser del mes previo).
+    Total del período = suma de deltas semanales.
+    """
+    # Historial completo ordenado
+    historial = {gid: [] for gid in grua_ids}
+    for row in all_rows_sorted:
+        for gid in grua_ids:
+            v = row.get(gid)
+            if isinstance(v, (int, float)):
+                historial[gid].append((row["fecha"], float(v)))
+
+    for key, p in periodos.items():
+        semanas_fechas = p["semanas_fechas"]
+        if not semanas_fechas:
+            continue
+
+        for gid in grua_ids:
+            hist = historial[gid]   # ya ordenado por fecha
+            hrs_semanas  = []
+            total_hrs    = 0.0
+            tiene_alguno = False
+
+            for sem_fecha in semanas_fechas:
+                # Valor del horómetro en esta semana
+                sem_val = None
+                for f, v in hist:
+                    if f == sem_fecha:
+                        sem_val = v
+                        break
+
+                # Lectura más reciente ANTES de esta semana (puede ser otro mes)
+                prev_val = None
+                for f, v in hist:
+                    if f < sem_fecha:
+                        prev_val = v  # sobreescribe hasta llegar a la más reciente
+
+                if sem_val is not None and prev_val is not None:
+                    delta = round(max(sem_val - prev_val, 0), 1)
+                    hrs_semanas.append(delta)
+                    total_hrs   += delta
+                    tiene_alguno = True
+                else:
+                    hrs_semanas.append(None)   # semana sin dato calculable
+
+            p["hrs_por_semana"][gid] = hrs_semanas
+            p["hrsporgid"][gid]      = round(total_hrs, 1)
+            p["tiene_dato"][gid]     = tiene_alguno
+
 def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
-    all_rows = []
+    all_rows    = []
     seen_fechas = set()
 
     for year in range(2024, hoy.year + 1):
@@ -232,59 +254,52 @@ def merge_anos(excel_bytes, leer_fn, grua_ids, hoy):
 
 def get_status(hrs, tiene_dato):
     if not tiene_dato:
-        return {"key":"sin_dato","label":"Sin dato","cls":"no-data"}
+        return {"key":"sin_dato", "label":"Sin dato", "cls":"no-data"}
     pct = hrs / LIMIT_HRS
     if hrs >= LIMIT_HRS:
-        return {"key":"limit","label":"Límite Superado","cls":"limit"}
+        return {"key":"limit",      "label":"Límite Superado", "cls":"limit"}
     if pct >= 0.86:
-        return {"key":"alert","label":"Alerta","cls":"alert"}
+        return {"key":"alert",      "label":"Alerta",          "cls":"alert"}
     if pct >= 0.60:
-        return {"key":"precaution","label":"Precaución","cls":"precaution"}
-    return         {"key":"ok","label":"OK","cls":"ok"}
-
-def build_card(gid, empresa, hrs, tiene_dato, idx):
-    st    = get_status(hrs, tiene_dato)
-    pct   = min(hrs / LIMIT_HRS * 100, 100) if tiene_dato else 0
-    disp  = max(LIMIT_HRS - hrs, 0) if tiene_dato else LIMIT_HRS
-    val   = f"{hrs:.1f}" if tiene_dato else "—"
-    delay = f"{idx * 0.04:.2f}s"
-    name  = gid.replace("EXP ","").replace("LINDE ","")
-    return f"""<div class="crane-card s-{st['cls']}" style="animation-delay:{delay}">
-  <div class="crane-header">
-    <div class="crane-name">{name}</div>
-    <div class="status-badge {st['cls']}">● {st['label']}</div>
-  </div>
-  <div class="crane-plate">BAJA · {empresa}</div>
-  <div class="crane-km">
-    <span class="crane-km-val">{val}</span>
-    <span class="crane-km-of">/ {LIMIT_HRS} hrs</span>
-  </div>
-  <div class="prog-bar"><div class="prog-fill {st['cls']}" style="width:{pct:.0f}%"></div></div>
-  <div class="crane-footer">
-    <span class="crane-pct">{pct:.0f}% del límite</span>
-    <span class="disp">{disp:.0f} hrs disp.</span>
-  </div>
-</div>"""
+        return {"key":"precaution", "label":"Precaución",      "cls":"precaution"}
+    return         {"key":"ok",      "label":"OK",              "cls":"ok"}
 
 def build_entry(p, gruas, colors):
-    cards = ""
+    """
+    Devuelve estructura con datos raw por grúa (incluyendo horas por semana)
+    para que el frontend pueda filtrar dinámicamente.
+    """
+    gruas_raw = []
     ok = prec = alert = limit = 0
     bar_labels, bar_data, bar_colors = [], [], []
-    for i, g in enumerate(gruas):
-        gid   = g["id"]
-        hrs   = p["hrsporgid"][gid]
-        tiene = p["tiene_dato"][gid]
-        st    = get_status(hrs, tiene)
-        cards += build_card(gid, g["empresa"], hrs, tiene, i)
-        bar_labels.append(gid.replace("EXP ","").replace("LINDE ",""))
+
+    for g in gruas:
+        gid     = g["id"]
+        name    = gid.replace("EXP ","").replace("LINDE ","")
+        hrs     = p["hrsporgid"][gid]
+        tiene   = p["tiene_dato"][gid]
+        hrs_sem = p["hrs_por_semana"].get(gid, [])
+        st      = get_status(hrs, tiene)
+
+        gruas_raw.append({
+            "id":          name,
+            "empresa":     g["empresa"],
+            "color":       colors.get(gid, "#0099D6"),
+            "hrs_semanas": hrs_sem,   # list of floats or None, one per semana
+            "tiene_dato":  tiene,
+        })
+
+        bar_labels.append(name)
         bar_data.append(round(hrs, 1) if tiene else 0)
         bar_colors.append(colors.get(gid, "#0099D6"))
+
         if   st["key"] == "ok":         ok    += 1
         elif st["key"] == "precaution": prec  += 1
         elif st["key"] == "alert":      alert += 1
         elif st["key"] == "limit":      limit += 1
+
     return {
-        "cards":      cards,
+        "gruas_raw":  gruas_raw,
         "ok": ok, "prec": prec, "alert": alert, "limit": limit,
         "bar_labels": bar_labels,
         "bar_data":   bar_data,
@@ -324,17 +339,17 @@ if __name__ == "__main__":
             continue
         base = p_imp or p_exp
         gruas_js[key] = {
-            "label":        base["label"],
-            "inicio_label": f"20 {MESES_ES[base['inicio'].month]} {base['inicio'].year}",
-            "fin_label":    f"20 {MESES_ES[base['fin'].month]} {base['fin'].year}",
-            "imp": build_entry(p_imp, GRUAS_IMPORT, COLORS_IMP) if has_imp else None,
-            "exp": build_entry(p_exp, GRUAS_EXPORT, COLORS_EXP) if has_exp else None,
+            "label": base["label"],   # e.g. "Mayo 2026"
+            "imp":   build_entry(p_imp, GRUAS_IMPORT, COLORS_IMP) if has_imp else None,
+            "exp":   build_entry(p_exp, GRUAS_EXPORT, COLORS_EXP) if has_exp else None,
         }
 
     keys_sorted = sorted(gruas_js.keys(), reverse=True)
-    actual_key, _, _, _ = periodo_key_label(hoy)
+
+    # Período actual = mes en curso
+    actual_key = f"{hoy.year}{hoy.month:02d}"
     if actual_key not in gruas_js:
-        actual_key = keys_sorted[0]
+        actual_key = keys_sorted[0] if keys_sorted else ""
 
     periodo_opts = ""
     for key in keys_sorted:
@@ -342,7 +357,8 @@ if __name__ == "__main__":
         periodo_opts += f'<option value="{key}" {sel}>{gruas_js[key]["label"]}</option>'
 
     print(f"Períodos procesados: {len(gruas_js)}")
-    print(f"Mostrando: {gruas_js[actual_key]['label']}")
+    if actual_key:
+        print(f"Mostrando: {gruas_js[actual_key]['label']}")
 
     with open("template.html", "r", encoding="utf-8") as f:
         t = f.read()
